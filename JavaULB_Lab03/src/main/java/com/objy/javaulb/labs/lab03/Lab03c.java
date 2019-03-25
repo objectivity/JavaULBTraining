@@ -153,14 +153,14 @@ public class Lab03c {
                 logger.info("intB8 = " + intB8);
                 var = iND.getAttributeValue("MyIntB8_Signed");
                 var.set((Long)intB8);
-                
+
                 String sB16 = "0100000000000000";                
                 long intB16 = parseBinary(sB16, SIGNED);
                 logger.info("sB16:  <" + sB16 + ">[" + sB16.length() + "]");
                 logger.info("intB16 = " + intB16);
                 var = iND.getAttributeValue("MyIntB16_Signed");
                 var.set((Long)intB16);
-                
+
                 String sB32 = "01000000000000000000000000000000";                
                 long intB32 = parseBinary(sB32, SIGNED);
                 logger.info("sB32:  <" + sB32 + ">[" + sB32.length() + "]");
@@ -216,8 +216,9 @@ public class Lab03c {
                 
                 
                 
-                    
-                
+                /*
+                    Reals...
+                */                
                 
                 var = iND.getAttributeValue("SimpleReal");
                 var.set((Double)3.14159);
