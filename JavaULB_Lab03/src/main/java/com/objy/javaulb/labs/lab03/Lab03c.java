@@ -139,33 +139,96 @@ public class Lab03c {
                 // a variable that we 'associate' with each attribute.
                 Variable var;
                 
+                
+                /*
+                    Signed Integers...
+                */
+                
                 String sB8 = "11000000";
                 long intB8 = parseBinary(sB8, SIGNED);
-                logger.info("sB8:  <" + sB8 + ">[" + sB8.length() + "]  intB8 = " + intB8);
+                logger.info("sB8:  <" + sB8 + ">[" + sB8.length() + "]");
+                logger.info("intB8 = " + intB8);
                 var = iND.getAttributeValue("MyIntB8_Signed");
                 var.set((Long)intB8);
                 
                 String sB16 = "0100000000000000";                
                 long intB16 = parseBinary(sB16, SIGNED);
-                logger.info("sB16:  <" + sB16 + ">[" + sB16.length() + "]  intB16 = " + intB16);
+                logger.info("sB16:  <" + sB16 + ">[" + sB16.length() + "]");
+                logger.info("intB16 = " + intB16);
                 var = iND.getAttributeValue("MyIntB16_Signed");
                 var.set((Long)intB16);
                 
                 String sB32 = "01000000000000000000000000000000";                
                 long intB32 = parseBinary(sB32, SIGNED);
-                logger.info("sB32:  <" + sB32 + ">[" + sB32.length() + "]  intB32 = " + intB32);
+                logger.info("sB32:  <" + sB32 + ">[" + sB32.length() + "]");
+                logger.info("intB32 = " + intB32);
                 var = iND.getAttributeValue("MyIntB32_Signed");
                 var.set((Long)intB32);
                 
+                //                      1111111111222222222233333333334444444444555555555566666
+                //             1234567890123456789012345678901234567890123456789012345678901234
                 String sB64 = "0100000000000000000000000000000000000000000000000000000000000000";                
                 long intB64 = parseBinary(sB64, SIGNED);
-                logger.info("sB64:  <" + sB64 + ">[" + sB64.length() + "]  intB64 = " + intB64);
+                logger.info("sB64:  <" + sB64 + ">[" + sB64.length() + "]");
+                logger.info("intB64 = " + intB64);
                 var = iND.getAttributeValue("MyIntB64_Signed");
                 var.set((Long)intB64);
                 
                 
-              
+                /*
+                    Unsigned Integers...
+                */
                 
+                
+                String uintSB8 = "11000000";
+                long uintB8 = parseBinary(uintSB8, UNSIGNED);
+                logger.info("uintSB8:  <" + uintSB8 + ">[" + uintSB8.length() + "]");
+                logger.info("intB8 = " + uintB8);
+                var = iND.getAttributeValue("MyIntB8_Unsigned");
+                var.set((Long)uintB8);
+                
+                String uintSB16 = "1000000000000000";                
+                long uintB16 = parseBinary(uintSB16, UNSIGNED);
+                logger.info("sB16:  <" + uintSB16 + ">[" + uintSB16.length() + "]");
+                logger.info("uintB16 = " + uintB16);
+                var = iND.getAttributeValue("MyIntB16_Unsigned");
+                var.set((Long)uintB16);
+                
+                String uintSB32 = "10000000000000000000000000000000";                
+                long uintB32 = parseBinary(uintSB32, UNSIGNED);
+                logger.info("uintSB32:  <" + uintSB32 + ">[" + sB32.length() + "]");
+                logger.info("uintB32 = " + uintB32);
+                var = iND.getAttributeValue("MyIntB32_Unsigned");
+                var.set((Long)uintB32);
+                
+                //                          1111111111222222222233333333334444444444555555555566666
+                //                 1234567890123456789012345678901234567890123456789012345678901234
+                String uintSB64 = "1000000000000000000000000000000000000000000000000000000000000000";                
+                long uintB64 = parseBinary(uintSB64, UNSIGNED);
+                logger.info("uintSB64:  <" + uintSB64 + ">[" + uintSB64.length() + "]");
+                logger.info("uintB64 = " + uintB64);
+                var = iND.getAttributeValue("MyIntB64_Unsigned");
+                var.set((Long)uintB64);
+                
+                
+                
+                
+                    // Avagadro's Number
+                
+                
+                var = iND.getAttributeValue("SimpleReal");
+                var.set((Double)3.14159);
+                
+                double avn1 = 602300000000000000000000.00;
+                var = iND.getAttributeValue("MyReal32_IEEE");
+                var.set((Double)avn1);
+                
+                double avn2 = 602312345678901234567890.00;
+                var = iND.getAttributeValue("MyReal64_IEEE");
+                var.set((Double)avn2);
+                
+                
+                                
                 
                 
 
