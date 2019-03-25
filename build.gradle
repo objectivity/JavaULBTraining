@@ -1,0 +1,149 @@
+import org.gradle.api.artifacts.*
+
+plugins {
+    id 'java'
+    id 'base'
+    //id 'com.github.johnrengelman.shadow' version '1.2.2'
+    id "com.github.johnrengelman.shadow" version "2.0.1"	// supports only gradle 3.0+
+    id "com.moowork.node" version "1.2.0"
+}
+
+
+//apply plugin: 'base' // To add "clean" task to the root project.
+//apply plugin: 'com.github.johnrengelman.shadow'
+
+
+
+
+// Java source settings
+sourceCompatibility = '1.8'
+sourceSets.main.java.srcDirs = ['src']
+
+def isWindows	= org.gradle.internal.os.OperatingSystem.current().windows
+def mycmd	= isWindows ? 'cmd' : 'bash'
+def myflag	= isWindows ? '/c' : '-c'
+
+
+//-----------------------------------------------------
+// Set version values here...
+//-----------------------------------------------------
+def thingspanVersion	= project.hasProperty('thingspanVersion') ? thingspanVersion 	:  '15.7'		// default
+def objyVersion 	= project.hasProperty('objyVersion')	? objyVersion   	:  '12.7.0' 	// default
+
+
+def objyinstalldir  =   isWindows ? 'C:\\Program Files' :  '/opt'
+def objyHome  = project.hasProperty('objyHome')    ? project.objyHome   : objyinstalldir + File.separator + 'ThingSpan' + File.separator + thingspanVersion
+
+
+
+
+
+
+
+
+
+subprojects {
+    apply from: rootProject.file('common.gradle')
+
+    apply plugin: "java"
+    apply plugin: 'com.github.johnrengelman.shadow'
+
+    dependencies {
+        // ===================================
+        // Local jars
+        // ===================================
+
+//        compile files("$objyHome/lib/oojava.jar")
+//        compile files("$objyHome/lib/ooexpr.jar")
+        compile files("$objyHome/lib/objydb-core-${objyVersion}.jar")
+    }
+
+    //================================================
+    // Artifactory settings
+    //================================================
+    def repositoryUrl = project.hasProperty('repositoryUrl') ? project.repositoryUrl : 'http://elysium.objy.com:8081/artifactory'
+
+    repositories {
+        ivy { url = "${repositoryUrl}/release" }
+        //mavenCentral()
+		maven { url 'http://repo1.maven.org/maven2' }
+		maven { url 'https://mvnrepository.com/artifact' }
+    }
+
+    ext {
+        objydbBranch = 'release-R12.1.0'
+    }
+
+    
+}
+
+
+
+//task mergedJavadoc(type: Javadoc, description: 'Creates Javadoc from all the projects.') {
+//    title = 'All modules'
+//    destinationDir = new File(project.buildDir, 'merged-javadoc')
+//
+//    // Note: The closures below are executed lazily.
+//    source {
+//       subprojects*.sourceSets*.main*.allSource
+//    }
+//    classpath.from {
+//        subprojects*.configurations*.compile*.copyRecursive({ !(it instanceof ProjectDependency); })*.resolve()
+//    }
+//}
+
+
+
+project (':JavaULB_Lab01') {
+    dependencies {
+        // Third party dependency
+        compile files("$objyHome/lib/objydb-core-${objyVersion}.jar")
+
+        compile 'org.slf4j:slf4j-api:1.8.0-beta1'
+        compile 'org.slf4j:slf4j-log4j12:1.8.0-beta1'
+        compile 'log4j:log4j:1.2.17'
+    }
+
+    // Start shadowJar task before test phase
+    test.dependsOn("shadowJar")
+    
+    
+    // Configure the shadow jar task
+    shadowJar {
+        zip64 true
+        dependencies {
+            include(dependency('com.objy.objydb:objydb-core:.*'))
+
+            include(dependency('org.slf4j:slf4j-api:1.8.0-beta1'))
+            include(dependency('org.slf4j:slf4j-log4j12:1.8.0-beta1'))
+            include(dependency('log4j:log4j:1.2.17'))
+        }
+    }
+}
+
+project (':JavaULB_Lab02') {
+    dependencies {
+        // Third party dependency
+        compile files("$objyHome/lib/objydb-core-${objyVersion}.jar")
+
+        compile 'org.slf4j:slf4j-api:1.8.0-beta1'
+        compile 'org.slf4j:slf4j-log4j12:1.8.0-beta1'
+        compile 'log4j:log4j:1.2.17'
+    }
+
+    // Start shadowJar task before test phase
+    test.dependsOn("shadowJar")
+    
+    
+    // Configure the shadow jar task
+    shadowJar {
+        zip64 true
+        dependencies {
+            include(dependency('com.objy.objydb:objydb-core:.*'))
+
+            include(dependency('org.slf4j:slf4j-api:1.8.0-beta1'))
+            include(dependency('org.slf4j:slf4j-log4j12:1.8.0-beta1'))
+            include(dependency('log4j:log4j:1.2.17'))
+        }
+    }
+}

@@ -1,0 +1,10 @@
+UPDATE SCHEMA {
+
+	CREATE CLASS Person {
+		firstName 	: string,
+		middleName 	: string,
+		lastName 	: string,
+		birthdate	: date
+	}
+}
+		
