@@ -144,6 +144,9 @@ public class Lab03c {
                     Signed Integers...
                 */
                 
+                var = iND.getAttributeValue("SimpleInteger");
+                var.set((Integer)33);
+                
                 String sB8 = "11000000";
                 long intB8 = parseBinary(sB8, SIGNED);
                 logger.info("sB8:  <" + sB8 + ">[" + sB8.length() + "]");
@@ -213,12 +216,13 @@ public class Lab03c {
                 
                 
                 
-                    // Avagadro's Number
+                    
                 
                 
                 var = iND.getAttributeValue("SimpleReal");
                 var.set((Double)3.14159);
                 
+                // Avagadro's Number
                 double avn1 = 602300000000000000000000.00;
                 var = iND.getAttributeValue("MyReal32_IEEE");
                 var.set((Double)avn1);
