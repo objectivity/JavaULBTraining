@@ -10,6 +10,7 @@ import com.objy.db.TransactionMode;
 import com.objy.db.TransactionScope;
 import java.io.File;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Properties;
 import org.slf4j.Logger;
@@ -19,9 +20,9 @@ import org.slf4j.LoggerFactory;
  *
  * @author Daniel
  */
-public class Lab03b {
+public class Lab03d {
 
-    private static Logger logger = LoggerFactory.getLogger(Lab03b.class);
+    private static Logger logger = LoggerFactory.getLogger(Lab03d.class);
 
     // The System.getProperties() value from which various things will be read.
     private Properties properties;
@@ -36,7 +37,7 @@ public class Lab03b {
 
 
 
-    public Lab03b() {
+    public Lab03d() {
 
         logger.info("Running " + this.getClass().getSimpleName());
 
@@ -47,8 +48,29 @@ public class Lab03b {
 
             createSchemaPerson();
 
-            createPersonInstance("John", "Q", "Doe");
-            createPersonInstance("John", "Q", "Doe");
+            GregorianCalendar gCal = new GregorianCalendar();
+            
+            
+            gCal.set(Calendar.DAY_OF_MONTH, 28);
+            gCal.set(Calendar.MONTH, 3);
+            gCal.set(Calendar.YEAR, 2000);            
+            Date dob = gCal.getTime();
+            
+            long ts = dob.getTime() + 10000000L;
+            
+            Date timestamp = new Date(ts);
+            
+            createPersonInstance("John", "Q", "Doe", dob, timestamp);
+            
+            
+            gCal.set(Calendar.DAY_OF_MONTH, 15);
+            gCal.set(Calendar.MONTH, 5);
+            gCal.set(Calendar.YEAR, 1966);            
+            dob = gCal.getTime();
+            ts = dob.getTime() + 10000000L;            
+            timestamp = new Date(ts);
+            
+            createPersonInstance("Mary", "B", "Smith", dob, timestamp);
 
             closeConnection();
 
@@ -107,7 +129,11 @@ public class Lab03b {
 
 
 
-    private void createPersonInstance(String firstName, String middleInitial, String lastName) {
+    private void createPersonInstance(String firstName, 
+                                    String middleInitial, 
+                                    String lastName,
+                                    Date dateOfBirth,
+                                    Date timestamp) {
 
         int transLCERetryCount = 0;
 	boolean transactionSuccessful = false;
@@ -136,6 +162,21 @@ public class Lab03b {
 
                 Variable vLastName = iPerson.getAttributeValue("LastName");
                 vLastName.set(lastName);
+                
+                
+                Variable vBirthdate = iPerson.getAttributeValue("DateOfBirth");
+                GregorianCalendar gCal = new GregorianCalendar();
+                gCal.setTime(dateOfBirth);
+                    // java.util.Calendar months are zero-based. 2 == March.                
+                vBirthdate.set(new com.objy.data.Date(
+                                        gCal.get(Calendar.YEAR), 
+                                        gCal.get(Calendar.MONTH), 
+                                        gCal.get(Calendar.DAY_OF_MONTH)));
+                
+                
+                Variable vTimestamp = iPerson.getAttributeValue("Timestamp");
+                vTimestamp.set(new com.objy.data.DateTime((java.util.Date)timestamp));
+
 
 
                 // The complete writes the data out to the database.
@@ -179,6 +220,10 @@ public class Lab03b {
                 cBuilder.addAttribute(LogicalType.STRING, "FirstName");
                 cBuilder.addAttribute(LogicalType.STRING, "LastName");
                 cBuilder.addAttribute(LogicalType.STRING, "MiddleInitial");
+                
+                cBuilder.addAttribute(LogicalType.DATE, "DateOfBirth");
+                
+                cBuilder.addAttribute(LogicalType.DATE_TIME, "Timestamp");
 
                 // Actually build the the schema representation.
                 com.objy.data.Class cPerson = cBuilder.build();
@@ -213,6 +258,6 @@ public class Lab03b {
 
 
     public static void main(String[] args) {
-        new Lab03b();
+        new Lab03d();
     }
 }

@@ -162,7 +162,6 @@ public class Lab03a {
                 cBuilder.addAttribute(LogicalType.STRING, "FirstName");
                 cBuilder.addAttribute(LogicalType.STRING, "LastName");
                 cBuilder.addAttribute(LogicalType.STRING, "MiddleInitial");
-                cBuilder.addAttribute(LogicalType.DATE, "Birthdate"); 
                 
                 // Actually build the the schema representation.
                 com.objy.data.Class cPerson = cBuilder.build();

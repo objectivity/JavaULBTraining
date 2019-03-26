@@ -1,6 +1,8 @@
 
 
 
+def LAB_NAME = "Lab04"
+
 def version = "0.1"
 
 
@@ -16,15 +18,13 @@ def myflag	= isWindows ? '/c' : '-c'
 //-----------------------------------------------------
 // Set version values here...
 //-----------------------------------------------------
-def thingspanVersion	= project.hasProperty('thingspanVersion') ? thingspanVersion 	:  '15.7'	// default
+def thingspanVersion	= project.hasProperty('thingspanVersion') ? thingspanVersion 	:  '15.7'		// default
 def objyVersion 	= project.hasProperty('objyVersion')	? objyVersion   	:  '12.7.0' 	// default
 
 
 def objyinstalldir  =   isWindows ? 'C:\\Program Files' :  '/opt'
 def objyHome  = project.hasProperty('objyHome')    ? project.objyHome   : objyinstalldir + File.separator + 'ThingSpan' + File.separator + thingspanVersion
 
-
-def LAB_NAME = "Lab01"
 
 def xPROJECT_DIR        = "" + getProjectDir()
 def PROJECT_DIR		= xPROJECT_DIR.replaceAll("\\\\", "/")
@@ -60,7 +60,7 @@ if (System.getProperty('os.name').toLowerCase(Locale.ROOT).contains('windows')) 
 //==================================
 // FD Variables
 //==================================
-def fdname           = project.hasProperty('fdname')            ? project.fdname            : 'Lab01'
+def fdname           = project.hasProperty('fdname')            ? project.fdname            : "${LAB_NAME}"
 def fddirhost        = project.hasProperty('fddirhost')         ? project.fddirhost         : InetAddress.getLocalHost().getHostName()
 def fddirpath        = project.hasProperty('fddirpath')         ? project.fddirpath         : "${BOOTFILE_DIR}"
 def jnldirhost       = project.hasProperty('jnldirhost')        ? project.jnldirhost        : InetAddress.getLocalHost().getHostName()
@@ -88,20 +88,6 @@ task envVars () {
     }
 }
 
-//task fatJar(type: Jar) {
-//    manifest {
-//        attributes 'Implementation-Title': 'ThingSpan JavaULB Lab01',  
-//            'Implementation-Version': version,
-//            'Main-Class': 'com.objy.javaulb.labs.lab01.Lab01'
-//    }
-//    baseName = project.name + '-all'
-//    from { 
-//        configurations.compile.collect { 
-//            it.isDirectory() ? it : zipTree(it) 
-//        } 
-//    }
-//    with jar
-//}
 
 
 task cb(type: GradleBuild) {
@@ -144,21 +130,6 @@ task recreateFD(){
 }
 
 
-// Load the schema into the federation.
-task loadSchema () {
-
-    doLast{
-        println("Loading core schema file: ${SCHEMA_FILE}")
-        exec {
-            commandLine mycmd, myflag, "objy DO -infile ${SCHEMA_FILE} -bootfile ${bootfile}"
-            ignoreExitValue = true
-        }
-
-    }
-}
-
-
-
 //task applyPMD () {
 //    doLast{
 //        exec {
@@ -168,10 +139,10 @@ task loadSchema () {
 //    }
 //}
 
-task run1() {
+task run4a() {
 
     doLast{
-	println("Running 'run1'")
+	println("Running 'run2a'")
         println("LIB_DIR = ${LIB_DIR}")
         javaexec{
             classpath("${LIB_DIR}/JavaULB_${LAB_NAME}-1.0-SNAPSHOT-all.jar",                    
@@ -181,7 +152,7 @@ task run1() {
             "-DBOOT_FILE=${bootfile}", \
             "-Dlog4j.configuration=file:${PROJECT_DIR}/properties/log4j.properties"
             ]
-            main = "com.objy.javaulb.labs.lab01.Lab01"
+            main = "com.objy.javaulb.labs.lab04.Lab04a"
             standardInput = System.in
             if (project.hasProperty('args')) {
                     args(args.split(','))
@@ -189,6 +160,7 @@ task run1() {
         }
     }
 }
+
 
 
 

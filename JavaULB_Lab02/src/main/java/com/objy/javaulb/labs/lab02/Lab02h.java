@@ -22,9 +22,9 @@ import org.slf4j.LoggerFactory;
  *
  * @author Daniel
  */
-public class Lab02g {
+public class Lab02h {
 
-    private static Logger logger = LoggerFactory.getLogger(Lab02g.class);
+    private static Logger logger = LoggerFactory.getLogger(Lab02h.class);
 
     // The System.getProperties() value from which various things will be read.
     private Properties properties;
@@ -39,7 +39,7 @@ public class Lab02g {
 
 
 
-    public Lab02g() {
+    public Lab02h() {
 
         logger.info("Running " + this.getClass().getSimpleName());
 
@@ -156,10 +156,13 @@ public class Lab02g {
                 cBuilderPerson.addAttribute(LogicalType.DATE, "Birthdate"); 
                 
                 cBuilderPerson.addAttribute("LivesAt", 
+                         new ListSpecificationBuilder()
+                                .setElementSpecification(
                             new ReferenceSpecificationBuilder()
                                     .setReferencedClass("Address")
                                     .setInverseAttribute("LivesHere")
-                                    .build()); 
+                                    .build())
+                                 .build()); 
                 
                 // Actually build the the schema representation.
                 com.objy.data.Class cPerson = cBuilderPerson.build();
@@ -193,6 +196,6 @@ public class Lab02g {
 
 
     public static void main(String[] args) {
-        new Lab02g();
+        new Lab02h();
     }
 }

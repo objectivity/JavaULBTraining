@@ -25,13 +25,6 @@ def objyVersion 	= project.hasProperty('objyVersion')	? objyVersion   	:  '12.7.
 def objyinstalldir  =   isWindows ? 'C:\\Program Files' :  '/opt'
 def objyHome  = project.hasProperty('objyHome')    ? project.objyHome   : objyinstalldir + File.separator + 'ThingSpan' + File.separator + thingspanVersion
 
-if (isWindows) {
-    println "Running on a Windows platform."
-} else {
-    println "Running on a Linux/Solaris platform."
-}
-
-
 
 def xPROJECT_DIR        = "" + getProjectDir()
 def PROJECT_DIR		= xPROJECT_DIR.replaceAll("\\\\", "/")
@@ -308,6 +301,28 @@ task run2g() {
             "-Dlog4j.configuration=file:${PROJECT_DIR}/properties/log4j.properties"
             ]
             main = "com.objy.javaulb.labs.lab02.Lab02g"
+            standardInput = System.in
+            if (project.hasProperty('args')) {
+                    args(args.split(','))
+            }
+        }
+    }
+}
+
+task run2h() {
+
+    doLast{
+	println("Running 'run2h'")
+        println("LIB_DIR = ${LIB_DIR}")
+        javaexec{
+            classpath("${LIB_DIR}/JavaULB_${LAB_NAME}-1.0-SNAPSHOT-all.jar",                    
+                     "${objyHome}/lib/objydb-core-${objyVersion}.jar")
+            jvmArgs = [\
+            "-Xmx8G", \
+            "-DBOOT_FILE=${bootfile}", \
+            "-Dlog4j.configuration=file:${PROJECT_DIR}/properties/log4j.properties"
+            ]
+            main = "com.objy.javaulb.labs.lab02.Lab02h"
             standardInput = System.in
             if (project.hasProperty('args')) {
                     args(args.split(','))

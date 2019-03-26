@@ -1,19 +1,19 @@
 package com.objy.javaulb.labs.lab02;
 
 import com.objy.data.schemaProvider.SchemaProvider;
-import com.objy.data.ClassBuilder;
-
-import com.objy.data.DataSpecification;
-import com.objy.data.Encoding;
-import com.objy.data.dataSpecificationBuilder.*;
-
+import com.objy.data.Instance;
 import com.objy.data.LogicalType;
-import com.objy.data.Storage;
+import com.objy.data.Variable;
+import com.objy.data.dataSpecificationBuilder.ListSpecificationBuilder;
+import com.objy.data.dataSpecificationBuilder.StringSpecificationBuilder;
 import com.objy.db.Connection;
 import com.objy.db.LockConflictException;
 import com.objy.db.TransactionMode;
 import com.objy.db.TransactionScope;
 import java.io.File;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,8 +48,9 @@ public class Lab02f {
 
             openConnection(bootFile);
 
-            createSchema();
+            createSchemaPerson();
 
+            
             closeConnection();
 
         } catch (Exception ex) {
@@ -106,74 +107,50 @@ public class Lab02f {
 
 
 
-    /**
-     * This function will create two classes, an Egg class and a Carton class.
-     * The Carton class has an attribute that is a list of references to Egg 
-     * objects.
-     */
-    private void createSchema() {
+
+   
+
+
+    private void createSchemaPerson() {
 
         int transLCERetryCount = 0;
 	boolean transactionSuccessful = false;
 	while (!transactionSuccessful) {
             // Create a new TransactionScope that is READ_UPDATE.
             try (TransactionScope tx = new TransactionScope(TransactionMode.READ_UPDATE)) {
-                
+
                 // Ensure that our view of the schema is up to date.
                 SchemaProvider.getDefaultPersistentProvider().refresh(true);
-                
-                //--------------------------------------------------------------
-                // Use ClassBuilder to create the schema definition.
-                com.objy.data.ClassBuilder cBuilderAddress = new com.objy.data.ClassBuilder("Address");
-                cBuilderAddress.addAttribute(LogicalType.STRING, "Street1");
-                cBuilderAddress.addAttribute(LogicalType.STRING, "Street2");
-                cBuilderAddress.addAttribute(LogicalType.STRING, "City");
-                cBuilderAddress.addAttribute(LogicalType.STRING, "State");
-                cBuilderAddress.addAttribute(LogicalType.STRING, "ZIP");
-                
-                cBuilderAddress.addAttribute("LivesHere", 
-                            new ListSpecificationBuilder()
-                                .setElementSpecification(
-                                new ReferenceSpecificationBuilder()
-                                        .setReferencedClass("Person")
-                                        .setInverseAttribute("LivesAt")
-                                        .build())
-                                    .build()); 
-                
-                // Actually build the the schema representation.
-                com.objy.data.Class cAddress = cBuilderAddress.build();
-                
-                // Represent the new class into the federated database.
-                SchemaProvider.getDefaultPersistentProvider().represent(cAddress);
-                
-                
 
                 // Use ClassBuilder to create the schema definition.
-                com.objy.data.ClassBuilder cBuilderPerson = new com.objy.data.ClassBuilder("Person");
-                cBuilderPerson.addAttribute(LogicalType.STRING, "FirstName");
-                cBuilderPerson.addAttribute(LogicalType.STRING, "LastName");
-                cBuilderPerson.addAttribute(LogicalType.STRING, "MiddleInitial");
-                cBuilderPerson.addAttribute(LogicalType.DATE, "Birthdate"); 
-                
-                cBuilderPerson.addAttribute("LivesAt", 
-                            new ReferenceSpecificationBuilder()
-                                    .setReferencedClass("Address")
-                                    .setInverseAttribute("LivesHere")
-                                    .build()); 
-                
+                com.objy.data.ClassBuilder cBuilder = new com.objy.data.ClassBuilder("Person");
+                cBuilder.addAttribute(LogicalType.STRING, "FirstName");
+                cBuilder.addAttribute(LogicalType.STRING, "LastName");
+                cBuilder.addAttribute(LogicalType.STRING, "MiddleInitial");
+
+                cBuilder.addAttribute(LogicalType.DATE, "DateOfBirth");
+
+                cBuilder.addAttribute(LogicalType.DATE_TIME, "Timestamp");
+
+                cBuilder.addAttribute(
+                        "MyPhoneNumbers",
+                        new ListSpecificationBuilder()
+                                .setElementSpecification(
+                                    new StringSpecificationBuilder()
+                                        .build())
+                                .build());
+
+
                 // Actually build the the schema representation.
-                com.objy.data.Class cPerson = cBuilderPerson.build();
-                
+                com.objy.data.Class cPerson = cBuilder.build();
+
                 // Represent the new class into the federated database.
                 SchemaProvider.getDefaultPersistentProvider().represent(cPerson);
-                
-                
-                
-                
+
                 // Complete and close the transaction
                 tx.complete();
                 tx.close();
-                
+
                 logger.info("Person class created in schema.");
 
                 transactionSuccessful = true;
@@ -190,6 +167,11 @@ public class Lab02f {
 	    }
 	}
     }
+
+
+
+
+
 
 
     public static void main(String[] args) {
