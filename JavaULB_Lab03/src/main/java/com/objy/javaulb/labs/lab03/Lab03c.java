@@ -313,7 +313,7 @@ public class Lab03c {
                                       new IntegerSpecificationBuilder(Storage.Integer.B32)
                                             .setEncoding(Encoding.Integer.SIGNED)
                                             .build());
-                cBuilder.addAttribute("MyInt64_Signed", 
+                cBuilder.addAttribute("MyIntB64_Signed", 
                                       new IntegerSpecificationBuilder(Storage.Integer.B64)
                                             .setEncoding(Encoding.Integer.SIGNED)
                                             .build());
@@ -332,7 +332,7 @@ public class Lab03c {
                                       new IntegerSpecificationBuilder(Storage.Integer.B32)
                                             .setEncoding(Encoding.Integer.UNSIGNED)
                                             .build());
-                cBuilder.addAttribute("MyInt64_Unsigned", 
+                cBuilder.addAttribute("MyIntB64_Unsigned", 
                                       new IntegerSpecificationBuilder(Storage.Integer.B64)
                                             .setEncoding(Encoding.Integer.UNSIGNED)
                                             .build());

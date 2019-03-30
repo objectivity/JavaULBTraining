@@ -276,6 +276,29 @@ task run3e() {
 }
 
 
+task run3f() {
+
+    doLast{
+	println("Running 'run3f'")
+        println("LIB_DIR = ${LIB_DIR}")
+        javaexec{
+            classpath("${LIB_DIR}/JavaULB_${LAB_NAME}-1.0-SNAPSHOT-all.jar",                    
+                     "${objyHome}/lib/objydb-core-${objyVersion}.jar")
+            jvmArgs = [\
+            "-Xmx8G", \
+            "-DBOOT_FILE=${bootfile}", \
+            "-Dlog4j.configuration=file:${PROJECT_DIR}/properties/log4j.properties"
+            ]
+            main = "com.objy.javaulb.labs.lab03.Lab03f"
+            standardInput = System.in
+            if (project.hasProperty('args')) {
+                    args(args.split(','))
+            }
+        }
+    }
+}
+
+
 
 
 
