@@ -18,8 +18,8 @@ def myflag	= isWindows ? '/c' : '-c'
 //-----------------------------------------------------
 // Set version values here...
 //-----------------------------------------------------
-def thingspanVersion	= project.hasProperty('thingspanVersion') ? thingspanVersion 	:  '15.7'		// default
-def objyVersion 	= project.hasProperty('objyVersion')	? objyVersion   	:  '12.7.0' 	// default
+def thingspanVersion	= project.hasProperty('thingspanVersion') ? thingspanVersion 	:  '15.8'	// default
+def objyVersion 	= project.hasProperty('objyVersion')	? objyVersion   	:  '12.8.0' 	// default
 
 
 def objyinstalldir  =   isWindows ? 'C:\\Program Files' :  '/opt'
@@ -331,6 +331,29 @@ task run2h() {
     }
 }
 
+
+task run2i() {
+
+    doLast{
+	println("Running 'run2i'")
+        println("LIB_DIR = ${LIB_DIR}")
+        println("PROJECT_DIR = ${PROJECT_DIR}")
+        javaexec{
+            classpath("${LIB_DIR}/JavaULB_${LAB_NAME}-1.0-SNAPSHOT-all.jar",                    
+                     "${objyHome}/lib/objydb-core-${objyVersion}.jar")
+            jvmArgs = [\
+            "-Xmx8G", \
+            "-DBOOT_FILE=${bootfile}", \
+            "-Dlog4j.configuration=file:${PROJECT_DIR}/properties/log4j.properties"
+            ]
+            main = "com.objy.javaulb.labs.lab02.Lab02i"
+            standardInput = System.in
+            if (project.hasProperty('args')) {
+                    args(args.split(','))
+            }
+        }
+    }
+}
 
 
 
