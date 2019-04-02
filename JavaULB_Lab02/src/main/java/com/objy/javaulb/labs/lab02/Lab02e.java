@@ -1,14 +1,9 @@
 package com.objy.javaulb.labs.lab02;
 
 import com.objy.data.schemaProvider.SchemaProvider;
-import com.objy.data.ClassBuilder;
-
-import com.objy.data.DataSpecification;
-import com.objy.data.Encoding;
 import com.objy.data.dataSpecificationBuilder.*;
 
 import com.objy.data.LogicalType;
-import com.objy.data.Storage;
 import com.objy.db.Connection;
 import com.objy.db.LockConflictException;
 import com.objy.db.TransactionMode;

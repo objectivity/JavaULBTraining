@@ -1,9 +1,7 @@
 package com.objy.javaulb.labs.lab02;
 
 import com.objy.data.schemaProvider.SchemaProvider;
-import com.objy.data.Instance;
 import com.objy.data.LogicalType;
-import com.objy.data.Variable;
 import com.objy.data.dataSpecificationBuilder.ListSpecificationBuilder;
 import com.objy.data.dataSpecificationBuilder.StringSpecificationBuilder;
 import com.objy.db.Connection;
@@ -11,9 +9,6 @@ import com.objy.db.LockConflictException;
 import com.objy.db.TransactionMode;
 import com.objy.db.TransactionScope;
 import java.io.File;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

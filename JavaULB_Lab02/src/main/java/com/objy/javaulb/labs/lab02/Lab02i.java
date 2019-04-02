@@ -1,10 +1,7 @@
 package com.objy.javaulb.labs.lab02;
 
-import com.objy.data.schemaProvider.SchemaProvider;
-import com.objy.data.ClassBuilder;
-
-import com.objy.data.DataSpecification;
 import com.objy.data.Encoding;
+import com.objy.data.schemaProvider.SchemaProvider;
 import com.objy.data.dataSpecificationBuilder.*;
 
 import com.objy.data.LogicalType;
@@ -22,9 +19,9 @@ import org.slf4j.LoggerFactory;
  *
  * @author Daniel
  */
-public class Lab02h {
+public class Lab02i {
 
-    private static Logger logger = LoggerFactory.getLogger(Lab02h.class);
+    private static Logger logger = LoggerFactory.getLogger(Lab02i.class);
 
     // The System.getProperties() value from which various things will be read.
     private Properties properties;
@@ -39,7 +36,7 @@ public class Lab02h {
 
 
 
-    public Lab02h() {
+    public Lab02i() {
 
         logger.info("Running " + this.getClass().getSimpleName());
 
@@ -107,9 +104,8 @@ public class Lab02h {
 
 
     /**
-     * This function will create two classes, an Egg class and a Carton class.
-     * The Carton class has an attribute that is a list of references to Egg 
-     * objects.
+     * This function will create two classes, a Geolocation class and an
+     * Address class.
      */
     private void createSchema() {
 
@@ -118,65 +114,57 @@ public class Lab02h {
 	while (!transactionSuccessful) {
             // Create a new TransactionScope that is READ_UPDATE.
             try (TransactionScope tx = new TransactionScope(TransactionMode.READ_UPDATE)) {
-                
+
                 // Ensure that our view of the schema is up to date.
                 SchemaProvider.getDefaultPersistentProvider().refresh(true);
-                
+
                 //--------------------------------------------------------------
                 // Use ClassBuilder to create the schema definition.
+                com.objy.data.ClassBuilder cBuilderGeoLoc = new com.objy.data.ClassBuilder("GeoLocation");
+                cBuilderGeoLoc.setEmbeddable();
+                cBuilderGeoLoc.addAttribute("Latitude",
+                                      new RealSpecificationBuilder(Storage.Real.B64)
+                                            .setEncoding(Encoding.Real.IEEE)
+                                            .build());
+                cBuilderGeoLoc.addAttribute("Longitude",
+                                      new RealSpecificationBuilder(Storage.Real.B64)
+                                            .setEncoding(Encoding.Real.IEEE)
+                                            .build());
+
+                // Actually build the the schema representation.
+                com.objy.data.Class cGeoLoc = cBuilderGeoLoc.build();
+
+
+                // Represent the new class into the federated database.
+                SchemaProvider.getDefaultPersistentProvider().represent(cGeoLoc);
+
+
+
                 com.objy.data.ClassBuilder cBuilderAddress = new com.objy.data.ClassBuilder("Address");
                 cBuilderAddress.addAttribute(LogicalType.STRING, "Street1");
                 cBuilderAddress.addAttribute(LogicalType.STRING, "Street2");
                 cBuilderAddress.addAttribute(LogicalType.STRING, "City");
                 cBuilderAddress.addAttribute(LogicalType.STRING, "State");
                 cBuilderAddress.addAttribute(LogicalType.STRING, "ZIP");
-                
-                cBuilderAddress.addAttribute("LivesHere", 
-                            new ListSpecificationBuilder()
-                                .setElementSpecification(
-                                new ReferenceSpecificationBuilder()
-                                        .setReferencedClass("Person")
-                                        .setInverseAttribute("LivesAt")
-                                        .build())
-                                    .build()); 
-                
+
+                cBuilderAddress.addAttribute("GeoLocation", new InstanceSpecificationBuilder()
+                                    .setClass("GeoLocation")
+                                    .build());
+
                 // Actually build the the schema representation.
                 com.objy.data.Class cAddress = cBuilderAddress.build();
-                
+
                 // Represent the new class into the federated database.
                 SchemaProvider.getDefaultPersistentProvider().represent(cAddress);
-                
-                
 
-                // Use ClassBuilder to create the schema definition.
-                com.objy.data.ClassBuilder cBuilderPerson = new com.objy.data.ClassBuilder("Person");
-                cBuilderPerson.addAttribute(LogicalType.STRING, "FirstName");
-                cBuilderPerson.addAttribute(LogicalType.STRING, "LastName");
-                cBuilderPerson.addAttribute(LogicalType.STRING, "MiddleInitial");
-                cBuilderPerson.addAttribute(LogicalType.DATE, "Birthdate"); 
-                
-                cBuilderPerson.addAttribute("LivesAt", 
-                         new ListSpecificationBuilder()
-                                .setElementSpecification(
-                            new ReferenceSpecificationBuilder()
-                                    .setReferencedClass("Address")
-                                    .setInverseAttribute("LivesHere")
-                                    .build())
-                                 .build()); 
-                
-                // Actually build the the schema representation.
-                com.objy.data.Class cPerson = cBuilderPerson.build();
-                
-                // Represent the new class into the federated database.
-                SchemaProvider.getDefaultPersistentProvider().represent(cPerson);
-                
-                
-                
-                
+
+
+
+
                 // Complete and close the transaction
                 tx.complete();
                 tx.close();
-                
+
                 logger.info("Person class created in schema.");
 
                 transactionSuccessful = true;
@@ -196,6 +184,6 @@ public class Lab02h {
 
 
     public static void main(String[] args) {
-        new Lab02h();
+        new Lab02i();
     }
 }

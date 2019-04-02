@@ -169,23 +169,6 @@ public class Lab03f {
                 vLastName.set(lastName);
 
 
-
-
-
-                // Add the phone numbers to MyPhoneNumbers in the object.
-//                Variable vPhoneNumbers = iPerson.getAttributeValue("MyPhoneNumbers");
-//                com.objy.data.List pnList = vPhoneNumbers.listValue();
-//
-//                Variable vPN = new Variable();
-//                for (String pn : phoneNumbers) {
-//                    vPN.set(pn);
-//                    pnList.add(vPN);
-//
-//                    vPN.clear();
-//                }
-
-
-
                 // The complete writes the data out to the database.
                 tx.complete();
 
