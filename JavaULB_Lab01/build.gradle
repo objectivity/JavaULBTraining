@@ -16,8 +16,8 @@ def myflag	= isWindows ? '/c' : '-c'
 //-----------------------------------------------------
 // Set version values here...
 //-----------------------------------------------------
-def thingspanVersion	= project.hasProperty('thingspanVersion') ? thingspanVersion 	:  '15.7'	// default
-def objyVersion 	= project.hasProperty('objyVersion')	? objyVersion   	:  '12.7.0' 	// default
+def thingspanVersion	= project.hasProperty('thingspanVersion') ? thingspanVersion 	:  '15.8'	// default
+def objyVersion 	= project.hasProperty('objyVersion')	? objyVersion   	:  '12.8.0' 	// default
 
 
 def objyinstalldir  =   isWindows ? 'C:\\Program Files' :  '/opt'
