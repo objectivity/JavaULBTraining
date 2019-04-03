@@ -8,28 +8,7 @@ def version = "0.1"
 
 // Java source settings
 sourceCompatibility = '1.8'
-sourceSets.main.java.srcDirs = ['src']
-
-def isWindows	= org.gradle.internal.os.OperatingSystem.current().windows
-def mycmd	= isWindows ? 'cmd' : 'bash'
-def myflag	= isWindows ? '/c' : '-c'
-
-
-//-----------------------------------------------------
-// Set version values here...
-//-----------------------------------------------------
-def thingspanVersion	= project.hasProperty('thingspanVersion') ? thingspanVersion 	:  '15.8'	// default
-def objyVersion 	= project.hasProperty('objyVersion')	? objyVersion   	:  '12.8.0' 	// default
-
-
-def objyinstalldir  =   isWindows ? 'C:\\Program Files' :  '/opt'
-def objyHome  = project.hasProperty('objyHome')    ? project.objyHome   : objyinstalldir + File.separator + 'ThingSpan' + File.separator + thingspanVersion
-
-if (isWindows) {
-    println "Running on a Windows platform."
-} else {
-    println "Running on a Linux/Solaris platform."
-}
+sourceSets.main.java.srcDirs = ['src/main/java']
 
 
 

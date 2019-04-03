@@ -8,30 +8,28 @@ plugins {
 }
 
 
-//apply plugin: 'base' // To add "clean" task to the root project.
-//apply plugin: 'com.github.johnrengelman.shadow'
-
 
 
 
 // Java source settings
 sourceCompatibility = '1.8'
-sourceSets.main.java.srcDirs = ['src']
+sourceSets.main.java.srcDirs = ['src/main/java']
 
-def isWindows	= org.gradle.internal.os.OperatingSystem.current().windows
-def mycmd	= isWindows ? 'cmd' : 'bash'
-def myflag	= isWindows ? '/c' : '-c'
+ext.isWindows	= org.gradle.internal.os.OperatingSystem.current().windows
+ext.mycmd	= isWindows ? 'cmd' : 'bash'
+ext.myflag	= isWindows ? '/c' : '-c'
 
 
 //-----------------------------------------------------
 // Set version values here...
 //-----------------------------------------------------
-def thingspanVersion	= project.hasProperty('thingspanVersion') ? thingspanVersion 	:  '15.8'	// default
-def objyVersion 	= project.hasProperty('objyVersion')	? objyVersion   	:  '12.8.0' 	// default
+ext.thingspanVersion	= project.hasProperty('thingspanVersion') ? thingspanVersion 	:  '15.9'	// default
+ext.objyVersion 	= project.hasProperty('objyVersion')	? objyVersion   	:  '12.9.0' 	// default
 
 
-def objyinstalldir  =   isWindows ? 'C:\\Program Files' :  '/opt'
-def objyHome  = project.hasProperty('objyHome')    ? project.objyHome   : objyinstalldir + File.separator + 'ThingSpan' + File.separator + thingspanVersion
+
+ext.objyinstalldir  =   isWindows ? 'C:\\Program Files' :  '/opt'
+ext.objyHome  = project.hasProperty('objyHome')    ? project.objyHome   : objyinstalldir + File.separator + 'ThingSpan' + File.separator + thingspanVersion
 
 
 

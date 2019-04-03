@@ -1,27 +1,12 @@
 
 
-
 def version = "0.1"
 
 
 // Java source settings
 sourceCompatibility = '1.8'
-sourceSets.main.java.srcDirs = ['src']
+sourceSets.main.java.srcDirs = ['src/main/java']
 
-def isWindows	= org.gradle.internal.os.OperatingSystem.current().windows
-def mycmd	= isWindows ? 'cmd' : 'bash'
-def myflag	= isWindows ? '/c' : '-c'
-
-
-//-----------------------------------------------------
-// Set version values here...
-//-----------------------------------------------------
-def thingspanVersion	= project.hasProperty('thingspanVersion') ? thingspanVersion 	:  '15.8'	// default
-def objyVersion 	= project.hasProperty('objyVersion')	? objyVersion   	:  '12.8.0' 	// default
-
-
-def objyinstalldir  =   isWindows ? 'C:\\Program Files' :  '/opt'
-def objyHome  = project.hasProperty('objyHome')    ? project.objyHome   : objyinstalldir + File.separator + 'ThingSpan' + File.separator + thingspanVersion
 
 
 def LAB_NAME = "Lab01"
@@ -88,20 +73,6 @@ task envVars () {
     }
 }
 
-//task fatJar(type: Jar) {
-//    manifest {
-//        attributes 'Implementation-Title': 'ThingSpan JavaULB Lab01',  
-//            'Implementation-Version': version,
-//            'Main-Class': 'com.objy.javaulb.labs.lab01.Lab01'
-//    }
-//    baseName = project.name + '-all'
-//    from { 
-//        configurations.compile.collect { 
-//            it.isDirectory() ? it : zipTree(it) 
-//        } 
-//    }
-//    with jar
-//}
 
 
 task cb(type: GradleBuild) {
@@ -157,16 +128,6 @@ task loadSchema () {
     }
 }
 
-
-
-//task applyPMD () {
-//    doLast{
-//        exec {
-//            commandLine mycmd, myflag, "objy importPlacement -infile ${PMD_FILE} -bootfile ${bootfile}"
-//            ignoreExitValue = true
-//        }
-//    }
-//}
 
 task run1() {
 
