@@ -31,7 +31,7 @@ ext.objyVersion 	= project.hasProperty('objyVersion')	? objyVersion   	:  '12.9.
 ext.objyinstalldir  =   isWindows ? 'C:\\Program Files' :  '/opt'
 ext.objyHome  = project.hasProperty('objyHome')    ? project.objyHome   : objyinstalldir + File.separator + 'ThingSpan' + File.separator + thingspanVersion
 
-
+ext.dataDir = ""
 
 
 

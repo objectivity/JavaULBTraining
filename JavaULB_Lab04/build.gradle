@@ -12,6 +12,13 @@ sourceSets.main.java.srcDirs = ['src/main/java']
 
 
 
+println  "Root project:   ${project.rootProject}";
+println  "  rootDir:      ${project.rootDir}"
+println  "  projectDir:   ${project.projectDir}";
+println  "  project dir:  ${System.getProperty("user.dir")}";
+
+
+
 def xPROJECT_DIR        = "" + getProjectDir()
 def PROJECT_DIR		= xPROJECT_DIR.replaceAll("\\\\", "/")
 
@@ -139,6 +146,85 @@ task run4a() {
     }
 }
 
+
+task run4b() {
+
+    doLast{
+	println("Running 'run4b'")
+        println("LIB_DIR = ${LIB_DIR}")
+        javaexec{
+            classpath("${LIB_DIR}/JavaULB_${LAB_NAME}-1.0-SNAPSHOT-all.jar",                    
+                     "${objyHome}/lib/objydb-core-${objyVersion}.jar")
+            jvmArgs = [\
+            "-Xmx8G", \
+            "-DBOOT_FILE=${bootfile}", \
+            "-DFEMALE_NAME_FILE=${project.rootDir}/data/gendata/dist.female.first.txt", \
+            "-DMALE_NAME_FILE=${project.rootDir}/data/gendata/dist.male.first.txt", \
+            "-DLAST_NAME_FILE=${project.rootDir}/data/gendata/dist.all.last.txt", \
+            "-Dlog4j.configuration=file:${PROJECT_DIR}/properties/log4j.properties"
+            ]
+            main = "com.objy.javaulb.labs.lab04.Lab04b"
+            standardInput = System.in
+            if (project.hasProperty('args')) {
+                    args(args.split(','))
+            }
+        }
+    }
+}
+
+
+
+task run4c() {
+
+    doLast{
+	println("Running 'run4c'")
+        println("LIB_DIR = ${LIB_DIR}")
+        javaexec{
+            classpath("${LIB_DIR}/JavaULB_${LAB_NAME}-1.0-SNAPSHOT-all.jar",                    
+                     "${objyHome}/lib/objydb-core-${objyVersion}.jar")
+            jvmArgs = [\
+            "-Xmx8G", \
+            "-DBOOT_FILE=${bootfile}", \
+            "-DFEMALE_NAME_FILE=${project.rootDir}/data/gendata/dist.female.first.txt", \
+            "-DMALE_NAME_FILE=${project.rootDir}/data/gendata/dist.male.first.txt", \
+            "-DLAST_NAME_FILE=${project.rootDir}/data/gendata/dist.all.last.txt", \
+            "-Dlog4j.configuration=file:${PROJECT_DIR}/properties/log4j.properties"
+            ]
+            main = "com.objy.javaulb.labs.lab04.Lab04c"
+            standardInput = System.in
+            if (project.hasProperty('args')) {
+                    args(args.split(','))
+            }
+        }
+    }
+}
+
+
+task run4d() {
+
+    doLast{
+	println("Running 'run4d'")
+        println("LIB_DIR = ${LIB_DIR}")
+        javaexec{
+            classpath("${LIB_DIR}/JavaULB_${LAB_NAME}-1.0-SNAPSHOT-all.jar",                    
+                     "${objyHome}/lib/objydb-core-${objyVersion}.jar")
+            jvmArgs = [\
+            "-Xmx8G", \
+            "-DBOOT_FILE=${bootfile}", \
+            "-DFEMALE_NAME_FILE=${project.rootDir}/data/gendata/dist.female.first.txt", \
+            "-DMALE_NAME_FILE=${project.rootDir}/data/gendata/dist.male.first.txt", \
+            "-DLAST_NAME_FILE=${project.rootDir}/data/gendata/dist.all.last.txt", \
+            "-DADDRESSES_FILE=${project.rootDir}/data/gendata/addresses.txt", \
+            "-Dlog4j.configuration=file:${PROJECT_DIR}/properties/log4j.properties"
+            ]
+            main = "com.objy.javaulb.labs.lab04.Lab04d"
+            standardInput = System.in
+            if (project.hasProperty('args')) {
+                    args(args.split(','))
+            }
+        }
+    }
+}
 
 
 

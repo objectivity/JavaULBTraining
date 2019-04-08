@@ -83,23 +83,23 @@ public class Lab03f {
             // Create a new TransactionScope that is READ_UPDATE.
             try (TransactionScope tx = new TransactionScope(TransactionMode.READ_UPDATE)) {
 
-            // Lookup the Person associated with fromOID.
-            Instance iPersonFrom = Instance.lookup(ObjectId.fromString(fromOID));
+                // Lookup the Person associated with fromOID.
+                Instance iPersonFrom = Instance.lookup(ObjectId.fromString(fromOID));
 
-            // Lookup the Person associated with toOID.
-            Instance iPersonTo = Instance.lookup(ObjectId.fromString(toOID));
+                // Lookup the Person associated with toOID.
+                Instance iPersonTo = Instance.lookup(ObjectId.fromString(toOID));
 
 
-            // Get the Knows list from iPersonFrom.
-            Variable vKnows = iPersonFrom.getAttributeValue("Knows");
-            com.objy.data.List knowsList = vKnows.listValue();
+                // Get the Knows list from iPersonFrom.
+                Variable vKnows = iPersonFrom.getAttributeValue("Knows");
+                com.objy.data.List knowsList = vKnows.listValue();
 
-            // vKnownEntry represents the Person that is "Known"
-            Reference refPersonTo = new Reference(iPersonTo);
-            Variable vPersonTo = new Variable(refPersonTo);
+                // vKnownEntry represents the Person that is "Known"
+                Reference refPersonTo = new Reference(iPersonTo);
+                Variable vPersonTo = new Variable(refPersonTo);
 
-            // Add the the vPersonTo entry to the knowsList.
-            knowsList.add(vPersonTo);
+                // Add the the vPersonTo entry to the knowsList.
+                knowsList.add(vPersonTo);
 
 
 

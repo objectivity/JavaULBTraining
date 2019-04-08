@@ -9,8 +9,6 @@ import com.objy.db.LockConflictException;
 import com.objy.db.TransactionMode;
 import com.objy.db.TransactionScope;
 import java.io.File;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,7 +46,7 @@ public class Lab03b {
             createSchemaPerson();
 
             createPersonInstance("John", "Q", "Doe");
-            createPersonInstance("John", "Q", "Doe");
+            createPersonInstance("Jane", "Q", "Doe");
 
             closeConnection();
 
