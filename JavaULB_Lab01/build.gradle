@@ -129,10 +129,10 @@ task loadSchema () {
 }
 
 
-task run1() {
+task run01() {
 
     doLast{
-	println("Running 'run1'")
+	println("Running 'run01'")
         println("LIB_DIR = ${LIB_DIR}")
         javaexec{
             classpath("${LIB_DIR}/JavaULB_${LAB_NAME}-1.0-SNAPSHOT-all.jar",                    
