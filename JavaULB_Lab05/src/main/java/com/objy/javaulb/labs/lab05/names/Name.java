@@ -1,4 +1,4 @@
-package com.objy.javaulb.labs.names;
+package com.objy.javaulb.labs.lab05.names;
 
 /**
  *

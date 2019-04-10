@@ -1,0 +1,177 @@
+
+
+
+def LAB_NAME = "Lab05"
+
+def version = "0.1"
+
+
+// Java source settings
+sourceCompatibility = '1.8'
+sourceSets.main.java.srcDirs = ['src/main/java']
+
+
+
+println  "Root project:   ${project.rootProject}";
+println  "  rootDir:      ${project.rootDir}"
+println  "  projectDir:   ${project.projectDir}";
+println  "  project dir:  ${System.getProperty("user.dir")}";
+
+
+
+def xPROJECT_DIR        = "" + getProjectDir()
+def PROJECT_DIR		= xPROJECT_DIR.replaceAll("\\\\", "/")
+
+def LIB_DIR		= PROJECT_DIR + "/build/libs/"
+def TEMP_DIR 		= PROJECT_DIR+"/tmp/"
+
+def SCHEMA_FILE		= PROJECT_DIR+"/data/"+LAB_NAME+".schema"
+
+def PMD_FILE            = PROJECT_DIR+"/data/"+LAB_NAME+".pmd"
+
+def BOOTFILE_FULLPATH
+def BOOTFILE_DIR
+
+if (System.getProperty('os.name').toLowerCase(Locale.ROOT).contains('windows')) {
+    //---------------------------------------
+    // Windows values here...
+    //---------------------------------------
+    BOOTFILE_DIR = "${PROJECT_DIR}/data/dbs"
+    BOOTFILE_FULLPATH = "${BOOTFILE_DIR}/${LAB_NAME}.boot"
+    PMD_FILE = "${PROJECT_DIR}/config/win/${LAB_NAME}.pmd"
+} else {
+    //---------------------------------------
+    // Non-Windows values here...
+    //---------------------------------------
+    //	BOOTFILE_DIR = "/NVMe/thingspan/dbs${DEPLOY_VERSION}"
+    BOOTFILE_DIR = "${PROJECT_DIR}/data/dbs"
+    BOOTFILE_FULLPATH = "${BOOTFILE_DIR}/${LAB_NAME}.boot"
+    PMD_FILE = PROJECT_DIR+"/config/linux/${LAB_NAME}.pmd"
+}
+
+
+//==================================
+// FD Variables
+//==================================
+def fdname           = project.hasProperty('fdname')            ? project.fdname            : "${LAB_NAME}"
+def fddirhost        = project.hasProperty('fddirhost')         ? project.fddirhost         : InetAddress.getLocalHost().getHostName()
+def fddirpath        = project.hasProperty('fddirpath')         ? project.fddirpath         : "${BOOTFILE_DIR}"
+def jnldirhost       = project.hasProperty('jnldirhost')        ? project.jnldirhost        : InetAddress.getLocalHost().getHostName()
+def jnldirpath       = project.hasProperty('jnldirpath')        ? project.jnldirpath        : "${fddirpath}" + "/jnl"
+def bootfile		 = "${fddirpath}/${fdname}.boot"
+// When expressing the full, UNC path the "${fddirhost}::" causes havoc on Windows/DOS.
+
+
+//==================================
+// Tasks
+//==================================
+
+task envVars () {
+    doLast {
+        println("------------------------------------------")
+        println("objyHome     = $objyHome")
+        println("PROJECT_DIR   = $PROJECT_DIR")
+	println("fdname       = $fdname")
+	println("fddirhost    = $fddirhost")
+	println("fddirpath    = $fddirpath")
+        println("jnldirpath    = jnldirpath")
+        println("bootfile     = $bootfile")
+        println("------------------------------------------")
+    }
+}
+
+
+
+task cb(type: GradleBuild) {
+    tasks = [ 'clean', 'build' ]
+}
+
+
+// Create FD
+task recreateFD(){
+    doLast{
+        makeDir(fddirpath)
+        makeDir(jnldirpath)
+
+	println "fddirhost is  ${fddirhost}"
+	println "fddirpath is  ${fddirpath}"
+	println "fdname is     ${fdname}"
+	println "bootfile is   ${bootfile}"
+
+
+        // TODO: Check lockserver
+
+        // cleanup fd
+        exec {
+            commandLine mycmd,  myflag, "objy cleanupFD -local -bootfile ${bootfile}"
+            ignoreExitValue = true
+        }
+
+        // Delete FD
+        exec {
+            commandLine mycmd,  myflag, "objy deletefd -bootfile ${bootfile}"
+            ignoreExitValue = true
+        }
+
+        // Create FD
+        exec {
+            commandLine mycmd,  myflag, "objy createfd -fdname ${fdname} -fdDirHost ${fddirhost} -fdDirPath ${fddirpath} -jnlDirHost ${jnldirhost} -jnlDirPath ${jnldirpath}"
+            ignoreExitValue = true
+        }
+    }
+}
+
+
+
+task run5a() {
+
+    doLast{
+	println("Running 'run5a'")
+        println("LIB_DIR = ${LIB_DIR}")
+        javaexec{
+            classpath("${LIB_DIR}/JavaULB_${LAB_NAME}-1.0-SNAPSHOT-all.jar",                    
+                     "${objyHome}/lib/objydb-core-${objyVersion}.jar")
+            jvmArgs = [\
+                "-Xmx8G", \
+                "-DBOOT_FILE=${bootfile}", \
+                "-DFEMALE_NAME_FILE=${project.rootDir}/data/gendata/dist.female.first.txt", \
+                "-DMALE_NAME_FILE=${project.rootDir}/data/gendata/dist.male.first.txt", \
+                "-DLAST_NAME_FILE=${project.rootDir}/data/gendata/dist.all.last.txt", \
+                "-DADDRESSES_FILE=${project.rootDir}/data/gendata/addresses.txt", \
+                "-Dlog4j.configuration=file:${PROJECT_DIR}/properties/log4j.properties"
+            ]
+            main = "com.objy.javaulb.labs.lab05.Lab05a"
+            standardInput = System.in
+            if (project.hasProperty('args')) {
+                    args(args.split(','))
+            }
+        }
+    }
+}
+
+
+
+
+
+def makeDir(dirPath){
+    def folder = new File(dirPath)
+    if(!folder.exists()){
+        folder.mkdirs()
+    }
+}
+
+
+// Note: "common.gradle" in the root project contains additional initialization
+//   for this project. This initialization is applied in the "build.gradle"
+//   of the root project.
+
+// NetBeans will automatically add "run" and "debug" tasks relying on the
+// "mainClass" property. You may however define the property prior executing
+// tasks by passing a "-PmainClass=<QUALIFIED_CLASS_NAME>" argument.
+//
+// Note however, that you may define your own "run" and "debug" task if you
+// prefer. In this case NetBeans will not add these tasks but you may rely on
+// your own implementation.
+//if (!hasProperty('mainClass')) {
+//    ext.mainClass = 'com.objy.javaulb.labs.lab01.Lab01'
+//}
