@@ -352,6 +352,9 @@ public class Lab03c {
                 
                 SchemaProvider.getDefaultPersistentProvider().represent(cNumbersDemo);
                 
+                // Process the schema changes.
+                SchemaProvider.getDefaultPersistentProvider().activateEdits();
+                
                 
                 // Complete and close the transaction
                 tx.complete();

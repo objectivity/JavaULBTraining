@@ -157,7 +157,8 @@ public class Lab02i {
                 // Represent the new class into the federated database.
                 SchemaProvider.getDefaultPersistentProvider().represent(cAddress);
 
-
+                // Process the schema changes.
+                SchemaProvider.getDefaultPersistentProvider().activateEdits();
 
 
 

@@ -152,7 +152,8 @@ public class Lab02d {
                 // Represent the new class into the federated database.
                 SchemaProvider.getDefaultPersistentProvider().represent(cPerson);
                 
-                
+                // Process the schema changes.
+                SchemaProvider.getDefaultPersistentProvider().activateEdits();
                 
                 
                 // Complete and close the transaction
