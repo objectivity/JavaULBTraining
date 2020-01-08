@@ -24,7 +24,7 @@ ext.myflag	= isWindows ? '/c' : '-c'
 // Set version values here...
 //-----------------------------------------------------
 ext.thingspanVersion	= project.hasProperty('thingspanVersion') ? thingspanVersion 	:  '15.9'	// default
-ext.objyVersion 	= project.hasProperty('objyVersion')	? objyVersion   	:  '12.9.0' 	// default
+ext.objyVersion 	= project.hasProperty('objyVersion')	? objyVersion   	:  '13.1.0' 	// default
 
 
 
