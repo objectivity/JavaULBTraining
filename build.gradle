@@ -31,6 +31,10 @@ ext.objyVersion 	= project.hasProperty('objyVersion')	? objyVersion   	:  '13.1.
 ext.objyinstalldir  =   isWindows ? 'C:\\Program Files' :  '/opt'
 ext.objyHome  = project.hasProperty('objyHome')    ? project.objyHome   : objyinstalldir + File.separator + 'ThingSpan' + File.separator + thingspanVersion
 
+println("objyHome     = $objyHome")
+println("objyVersion     = $objyVersion")
+println("ext.objyVersion     = $ext.objyVersion")
+
 ext.dataDir = ""
 
 
@@ -65,7 +69,7 @@ subprojects {
     }
 
     ext {
-        objydbBranch = 'release-R12.1.0'
+        objydbBranch = 'release-R13.1.0'
     }
 
     
@@ -85,149 +89,3 @@ subprojects {
 //        subprojects*.configurations*.compile*.copyRecursive({ !(it instanceof ProjectDependency); })*.resolve()
 //    }
 //}
-
-
-
-project (':JavaULB_Lab01') {
-    dependencies {
-        // Third party dependency
-        compile files("$objyHome/lib/objydb-core-${objyVersion}.jar")
-
-        compile 'org.slf4j:slf4j-api:1.8.0-beta1'
-        compile 'org.slf4j:slf4j-log4j12:1.8.0-beta1'
-        compile 'log4j:log4j:1.2.17'
-    }
-
-    // Start shadowJar task before test phase
-    test.dependsOn("shadowJar")
-    
-    
-    // Configure the shadow jar task
-    shadowJar {
-        zip64 true
-        dependencies {
-            include(dependency('com.objy.objydb:objydb-core:.*'))
-
-            include(dependency('org.slf4j:slf4j-api:1.8.0-beta1'))
-            include(dependency('org.slf4j:slf4j-log4j12:1.8.0-beta1'))
-            include(dependency('log4j:log4j:1.2.17'))
-        }
-    }
-}
-
-project (':JavaULB_Lab02') {
-    dependencies {
-        // Third party dependency
-        compile files("$objyHome/lib/objydb-core-${objyVersion}.jar")
-
-        compile 'org.slf4j:slf4j-api:1.8.0-beta1'
-        compile 'org.slf4j:slf4j-log4j12:1.8.0-beta1'
-        compile 'log4j:log4j:1.2.17'
-    }
-
-    // Start shadowJar task before test phase
-    test.dependsOn("shadowJar")
-    
-    
-    // Configure the shadow jar task
-    shadowJar {
-        zip64 true
-        dependencies {
-            include(dependency('com.objy.objydb:objydb-core:.*'))
-
-            include(dependency('org.slf4j:slf4j-api:1.8.0-beta1'))
-            include(dependency('org.slf4j:slf4j-log4j12:1.8.0-beta1'))
-            include(dependency('log4j:log4j:1.2.17'))
-        }
-    }
-}
-
-
-project (':JavaULB_Lab03') {
-    dependencies {
-        // Third party dependency
-        compile files("$objyHome/lib/objydb-core-${objyVersion}.jar")
-
-        compile 'org.slf4j:slf4j-api:1.8.0-beta1'
-        compile 'org.slf4j:slf4j-log4j12:1.8.0-beta1'
-        compile 'log4j:log4j:1.2.17'
-    }
-
-    // Start shadowJar task before test phase
-    test.dependsOn("shadowJar")
-    
-    
-    // Configure the shadow jar task
-    shadowJar {
-        zip64 true
-        dependencies {
-            include(dependency('com.objy.objydb:objydb-core:.*'))
-
-            include(dependency('org.slf4j:slf4j-api:1.8.0-beta1'))
-            include(dependency('org.slf4j:slf4j-log4j12:1.8.0-beta1'))
-            include(dependency('log4j:log4j:1.2.17'))
-        }
-    }
-}
-
-
-project (':JavaULB_Lab04') {
-    dependencies {
-        // Third party dependency
-        compile files("$objyHome/lib/objydb-core-${objyVersion}.jar")
-
-        compile 'org.slf4j:slf4j-api:1.8.0-beta1'
-        compile 'org.slf4j:slf4j-log4j12:1.8.0-beta1'
-        compile 'log4j:log4j:1.2.17'
-    }
-
-    // Start shadowJar task before test phase
-    test.dependsOn("shadowJar")
-    
-    
-    // Configure the shadow jar task
-    shadowJar {
-        zip64 true
-        dependencies {
-            include(dependency('com.objy.objydb:objydb-core:.*'))
-
-            include(dependency('org.slf4j:slf4j-api:1.8.0-beta1'))
-            include(dependency('org.slf4j:slf4j-log4j12:1.8.0-beta1'))
-            include(dependency('log4j:log4j:1.2.17'))
-        }
-    }
-}
-
-
-
-
-project (':JavaULB_Lab05') {
-    dependencies {
-        // Third party dependency
-        compile files("$objyHome/lib/objydb-core-${objyVersion}.jar")
-
-        compile 'org.slf4j:slf4j-api:1.8.0-beta1'
-        compile 'org.slf4j:slf4j-log4j12:1.8.0-beta1'
-        compile 'log4j:log4j:1.2.17'
-    }
-
-    // Start shadowJar task before test phase
-    test.dependsOn("shadowJar")
-    
-    
-    // Configure the shadow jar task
-    shadowJar {
-        zip64 true
-        dependencies {
-            include(dependency('com.objy.objydb:objydb-core:.*'))
-
-            include(dependency('org.slf4j:slf4j-api:1.8.0-beta1'))
-            include(dependency('org.slf4j:slf4j-log4j12:1.8.0-beta1'))
-            include(dependency('log4j:log4j:1.2.17'))
-        }
-    }
-}
-
-
-
-
