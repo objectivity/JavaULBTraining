@@ -6,7 +6,6 @@ import com.objy.data.schemaProvider.SchemaProvider;
 import com.objy.data.Instance;
 import com.objy.data.LogicalType;
 import com.objy.data.Reference;
-import com.objy.data.Sequence;
 import com.objy.data.Variable;
 import com.objy.data.Walk;
 import com.objy.data.dataSpecificationBuilder.ListSpecificationBuilder;
@@ -33,9 +32,9 @@ import org.slf4j.LoggerFactory;
  *
  * @author Daniel
  */
-public class Lab05a {
+public class Lab05a0 {
 
-    private static Logger logger = LoggerFactory.getLogger(Lab05a.class);
+    private static Logger logger = LoggerFactory.getLogger(Lab05a0.class);
 
 
     // The System.getProperties() value from which various things will be read.
@@ -51,7 +50,7 @@ public class Lab05a {
     private NameFactory nameFactory;
     private AddressFactory addressFactory;
 
-    public Lab05a() {
+    public Lab05a0() {
 
         logger.info("Running " + this.getClass().getSimpleName());
 
@@ -92,6 +91,12 @@ public class Lab05a {
                     + "-->(:Address)-->(:Person) RETURN *";
 
             matchQuery(doQuery2);
+
+
+
+
+
+
 //
 //            // Because Person contains a reference to Address called "LivesAt"
 //            // we can create a projection that includes attributes from both
@@ -258,6 +263,8 @@ public class Lab05a {
                                         .setReferencedClass("Address")
                                         .setInverseAttribute("LivesHere")
                                         .build());
+                
+                // Create the "LivesHere" end of the bidirectional to-many reference.
                 cBuilder.addAttribute("ToPerson",
                             new ReferenceSpecificationBuilder()
                                         .setReferencedClass("Person")
@@ -615,6 +622,6 @@ public class Lab05a {
 
 
     public static void main(String[] args) {
-        new Lab05a();
+        new Lab05a0();
     }
 }

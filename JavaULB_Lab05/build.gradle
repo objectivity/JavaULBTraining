@@ -67,9 +67,11 @@ def bootfile		 = "${fddirpath}/${fdname}.boot"
 
 project (':JavaULB_Lab05') {
     dependencies {
+        compile project(path: ':JavaULB_Utils', configuration: 'shadow')
+        
         // Third party dependency
         compile files("$objyHome/lib/objydb-core-${objyVersion}.jar")
-
+        
         compile 'org.slf4j:slf4j-api:1.8.0-beta1'
         compile 'org.slf4j:slf4j-log4j12:1.8.0-beta1'
         compile 'log4j:log4j:1.2.17'
@@ -83,6 +85,8 @@ project (':JavaULB_Lab05') {
     shadowJar {
         zip64 true
         dependencies {
+            include(dependency(':JavaULB_Utils'))
+            
             include(dependency('com.objy.objydb:objydb-core:.*'))
 
             include(dependency('org.slf4j:slf4j-api:1.8.0-beta1'))

@@ -1,0 +1,95 @@
+
+
+def LAB_NAME = "Lab05"
+
+def version = "0.1"
+
+
+// Java source settings
+sourceCompatibility = '1.8'
+sourceSets.main.java.srcDirs = ['src/main/java']
+
+
+
+println  "Root project:   ${project.rootProject}";
+println  "  rootDir:      ${project.rootDir}"
+println  "  projectDir:   ${project.projectDir}";
+println  "  project dir:  ${System.getProperty("user.dir")}";
+
+
+
+def xPROJECT_DIR        = "" + getProjectDir()
+def PROJECT_DIR		= xPROJECT_DIR.replaceAll("\\\\", "/")
+
+def LIB_DIR		= PROJECT_DIR + "/build/libs/"
+def TEMP_DIR 		= PROJECT_DIR+"/tmp/"
+
+def SCHEMA_FILE		= PROJECT_DIR+"/data/"+LAB_NAME+".schema"
+
+def PMD_FILE            = PROJECT_DIR+"/data/"+LAB_NAME+".pmd"
+
+def BOOTFILE_FULLPATH
+def BOOTFILE_DIR
+
+if (System.getProperty('os.name').toLowerCase(Locale.ROOT).contains('windows')) {
+    //---------------------------------------
+    // Windows values here...
+    //---------------------------------------
+    BOOTFILE_DIR = "${PROJECT_DIR}/data/dbs"
+    BOOTFILE_FULLPATH = "${BOOTFILE_DIR}/${LAB_NAME}.boot"
+    PMD_FILE = "${PROJECT_DIR}/config/win/${LAB_NAME}.pmd"
+} else {
+    //---------------------------------------
+    // Non-Windows values here...
+    //---------------------------------------
+    //	BOOTFILE_DIR = "/NVMe/thingspan/dbs${DEPLOY_VERSION}"
+    BOOTFILE_DIR = "${PROJECT_DIR}/data/dbs"
+    BOOTFILE_FULLPATH = "${BOOTFILE_DIR}/${LAB_NAME}.boot"
+    PMD_FILE = PROJECT_DIR+"/config/linux/${LAB_NAME}.pmd"
+}
+
+
+//==================================
+// FD Variables
+//==================================
+def fdname           = project.hasProperty('fdname')            ? project.fdname            : "${LAB_NAME}"
+def fddirhost        = project.hasProperty('fddirhost')         ? project.fddirhost         : InetAddress.getLocalHost().getHostName()
+def fddirpath        = project.hasProperty('fddirpath')         ? project.fddirpath         : "${BOOTFILE_DIR}"
+def jnldirhost       = project.hasProperty('jnldirhost')        ? project.jnldirhost        : InetAddress.getLocalHost().getHostName()
+def jnldirpath       = project.hasProperty('jnldirpath')        ? project.jnldirpath        : "${fddirpath}" + "/jnl"
+def bootfile		 = "${fddirpath}/${fdname}.boot"
+// When expressing the full, UNC path the "${fddirhost}::" causes havoc on Windows/DOS.
+
+
+
+
+
+
+
+
+dependencies {
+    // Third party dependency
+    compile files("$objyHome/lib/objydb-core-${objyVersion}.jar")
+
+    compile 'org.slf4j:slf4j-api:1.8.0-beta1'
+    compile 'org.slf4j:slf4j-log4j12:1.8.0-beta1'
+    compile 'log4j:log4j:1.2.17'
+}
+
+// Start shadowJar task before test phase
+test.dependsOn("shadowJar")
+
+
+// Configure the shadow jar task
+shadowJar {
+    zip64 true
+    dependencies {
+        include(dependency('com.objy.objydb:objydb-core:.*'))
+
+        include(dependency('org.slf4j:slf4j-api:1.8.0-beta1'))
+        include(dependency('org.slf4j:slf4j-log4j12:1.8.0-beta1'))
+        include(dependency('log4j:log4j:1.2.17'))
+    }
+}
+
+

@@ -33,9 +33,9 @@ import org.slf4j.LoggerFactory;
  *
  * @author Daniel
  */
-public class Lab05a {
+public class Lab05b {
 
-    private static Logger logger = LoggerFactory.getLogger(Lab05a.class);
+    private static Logger logger = LoggerFactory.getLogger(Lab05b.class);
 
 
     // The System.getProperties() value from which various things will be read.
@@ -51,7 +51,7 @@ public class Lab05a {
     private NameFactory nameFactory;
     private AddressFactory addressFactory;
 
-    public Lab05a() {
+    public Lab05b() {
 
         logger.info("Running " + this.getClass().getSimpleName());
 
@@ -81,45 +81,10 @@ public class Lab05a {
 
             int count = 1;
             createData(count);
-
-            String doQuery1 = "MATCH p = (:Person {LastName =~ '^Ne.*'}) "
-                    + "-->(:Address) RETURN *";
-
-            matchQuery(doQuery1);
             
-            
-            String doQuery2 = "MATCH p = (:Person {LastName =~ '^Ne.*'}) "
-                    + "-->(:Address)-->(:Person) RETURN *";
+            int readCount = getCount();
 
-            matchQuery(doQuery2);
-//
-//            // Because Person contains a reference to Address called "LivesAt"
-//            // we can create a projection that includes attributes from both
-//            // Person and Address. Here, we are traversing the LivesAt relationship
-//            // to pick up the LivesAt.City attribute but naming it "City" in
-//            // our projection.
-//            String doQuery2 = "FROM Person "
-//                    + "WHERE LastName =~ 'M.*' "
-//                    + "AND FirstName =~ 'T.*' "
-//                    + "RETURN LastName, FirstName, "
-//                    + "LivesAt.City as City, LivesAt.State as State";
-//            query(doQuery2);
-//
-//            String doQuery3 = "FROM Person "
-//                    + "WHERE LastName =~ 'M.*' "
-//                    + "AND FirstName =~ 'T.*' "
-//                    + "RETURN $$ID as oid, "
-//                    + "LastName, FirstName, "
-//                    + "LivesAt.City as City, LivesAt.State as State";
-//            query(doQuery3);
-//
-//            String doQuery4 = "FROM Person "
-//                    + "WHERE LivesAt.City =~ '^Sp.*' "
-//                    + "RETURN $$ID as oid, "
-//                    + "LastName, FirstName, "
-//                    + "LivesAt.City as City, LivesAt.State as State";
-//            query(doQuery4);
-
+           
 
             closeConnection();
 
@@ -195,7 +160,7 @@ public class Lab05a {
                 cBuilder.addAttribute(LogicalType.STRING, "LastName");
                 cBuilder.addAttribute(LogicalType.STRING, "MiddleName");
 
-                //
+                // Create the "LivesAt" end of the bidirectional to-many reference.
                 cBuilder.addAttribute("LivesAt",
                             new ListSpecificationBuilder()
                                 .setCollectionName("SegmentedArray")
@@ -225,7 +190,7 @@ public class Lab05a {
                 cBuilder.addAttribute(LogicalType.STRING, "State");
                 cBuilder.addAttribute(LogicalType.STRING, "ZIP");
 
-                //
+                // Create the "LivesHere" end of the bidirectional to-many reference.
                 cBuilder.addAttribute("LivesHere",
                             new ListSpecificationBuilder()
                                 .setCollectionName("SegmentedArray")
@@ -258,6 +223,8 @@ public class Lab05a {
                                         .setReferencedClass("Address")
                                         .setInverseAttribute("LivesHere")
                                         .build());
+                
+                // Create the "LivesHere" end of the bidirectional to-many reference.
                 cBuilder.addAttribute("ToPerson",
                             new ReferenceSpecificationBuilder()
                                         .setReferencedClass("Person")
@@ -414,15 +381,7 @@ public class Lab05a {
     }
 
 
-    private void matchQuery(String doQuery) {
-
-        print("");
-        print("");
-        print("========================================================");
-        print("QUERY: " + doQuery);
-        print("--------------------------------------------------------");
-
-        String oid = null;
+    private int getCount() {
 
         int transLCERetryCount = 0;
         boolean transactionSuccessful = false;
@@ -438,29 +397,37 @@ public class Lab05a {
 
                 Variable vStatementExecute;
 
+                String doQuery = "FROM Person RETURN COUNT(*)";
+               
                 Statement statement = new Statement(doLang, doQuery);
 
                 vStatementExecute = statement.execute();
 
+                logger.info("vStatementExecute logicalType is: " + vStatementExecute.getSpecification().getLogicalType().toString());
 
                 java.util.Iterator<Variable> it = vStatementExecute.sequenceValue().iterator();
                 if (!it.hasNext()) {
                     logger.info("There were no results on query:\n\n" + doQuery);
                 }
 
-                boolean headerPrinted = false;
-
                 int resultCount = 0;
                 while (it.hasNext()) {
 
                     Variable vProjection = it.next();
 
-                    //logger.info("vProjection is " + vProjection.getSpecification().getLogicalType().toString());
+                    logger.info("vProjection is " + vProjection.getSpecification().getLogicalType().toString());
 
-                    Instance iWalk = vProjection.instanceValue();
-                    displayInstance(iWalk);
-
-
+                    Instance iCount = vProjection.instanceValue();                    
+                    
+                    
+                    for (int i = 0; i < iCount.getClass(true).getNumberOfAttributes(); i++) {                        
+                        Attribute attr = iCount.getClass(true).getAttribute(i);                        
+                        logger.info("Attribute: " + attr.getName());                        
+                    }
+                    
+                    int count = iCount.getAttributeValue("COUNT(*)").intValue();
+                    logger.info("count = " + count);
+                    
                     resultCount++;
                 }
 
@@ -493,6 +460,8 @@ public class Lab05a {
         print("========================================================");
         print("");
         print("");
+        
+        return 0;
     }
 
 
@@ -615,6 +584,6 @@ public class Lab05a {
 
 
     public static void main(String[] args) {
-        new Lab05a();
+        new Lab05b();
     }
 }

@@ -22,6 +22,7 @@ import com.objy.javaulb.labs.lab05.addresses.Address;
 import com.objy.javaulb.labs.lab05.addresses.AddressFactory;
 import com.objy.javaulb.labs.lab05.names.Name;
 import com.objy.javaulb.labs.lab05.names.NameFactory;
+import com.objy.javaulb.utils.InstanceFormatter;
 import com.objy.statement.Statement;
 import java.io.File;
 import java.util.Iterator;
@@ -82,16 +83,24 @@ public class Lab05a {
             int count = 1;
             createData(count);
 
-            String doQuery1 = "MATCH p = (:Person {LastName =~ '^Ne.*'}) "
+            String doQuery1 = "MATCH p = (:Person {LastName == 'Doe'}) "
                     + "-->(:Address) RETURN *";
 
             matchQuery(doQuery1);
             
             
-            String doQuery2 = "MATCH p = (:Person {LastName =~ '^Ne.*'}) "
+//            String doQuery2 = "MATCH p = (:Person {LastName =~ '^Neal.*'}) "
+//                    + "-->(:Address)-->(:Person) RETURN *";
+//
+//            matchQuery(doQuery2);
+            
+            
+            String doQuery2 = "MATCH p = (:Person {LastName == 'Doe'}) "
                     + "-->(:Address)-->(:Person) RETURN *";
 
             matchQuery(doQuery2);
+            
+            
 //
 //            // Because Person contains a reference to Address called "LivesAt"
 //            // we can create a projection that includes attributes from both
@@ -195,7 +204,7 @@ public class Lab05a {
                 cBuilder.addAttribute(LogicalType.STRING, "LastName");
                 cBuilder.addAttribute(LogicalType.STRING, "MiddleName");
 
-                //
+                // Create the "LivesAt" end of the bidirectional to-many reference.
                 cBuilder.addAttribute("LivesAt",
                             new ListSpecificationBuilder()
                                 .setCollectionName("SegmentedArray")
@@ -225,7 +234,7 @@ public class Lab05a {
                 cBuilder.addAttribute(LogicalType.STRING, "State");
                 cBuilder.addAttribute(LogicalType.STRING, "ZIP");
 
-                //
+                // Create the "LivesHere" end of the bidirectional to-many reference.
                 cBuilder.addAttribute("LivesHere",
                             new ListSpecificationBuilder()
                                 .setCollectionName("SegmentedArray")
@@ -249,8 +258,6 @@ public class Lab05a {
 
                 // Use ClassBuilder to create the schema definition.
                 cBuilder = new com.objy.data.ClassBuilder("LivesEdge");
-                cBuilder.addAttribute(LogicalType.DATE, "From");
-                cBuilder.addAttribute(LogicalType.DATE, "To");
 
                 // Create the "LivesHere" end of the bidirectional to-many reference.
                 cBuilder.addAttribute("ToAddress",
@@ -258,6 +265,8 @@ public class Lab05a {
                                         .setReferencedClass("Address")
                                         .setInverseAttribute("LivesHere")
                                         .build());
+                
+                // Create the "LivesHere" end of the bidirectional to-many reference.
                 cBuilder.addAttribute("ToPerson",
                             new ReferenceSpecificationBuilder()
                                         .setReferencedClass("Person")
@@ -303,6 +312,9 @@ public class Lab05a {
 
 
 
+    private com.objy.data.Class cPerson;
+    private com.objy.data.Class cAddress;
+    private com.objy.data.Class cLivesEdge;
 
 
     private String createData(int count) {
@@ -318,73 +330,50 @@ public class Lab05a {
                 // Ensure that our view of the schema is up to date.
                 SchemaProvider.getDefaultPersistentProvider().refresh(true);
 
-                // Lookup the Person class from the schema in the ThingSpan federation.
-                com.objy.data.Class cPerson = com.objy.data.Class.lookupClass("Person");
+                // Lookup the various classes from the schema in the ThingSpan federation.
+                cPerson = com.objy.data.Class.lookupClass("Person");
+                cAddress = com.objy.data.Class.lookupClass("Address");
+                cLivesEdge = com.objy.data.Class.lookupClass("LivesEdge");
 
-                com.objy.data.Class cAddress = com.objy.data.Class.lookupClass("Address");
-                com.objy.data.Class cLivesEdge = com.objy.data.Class.lookupClass("LivesEdge");
 
-
+                // Create some addresses with people living at them.
                 for (int i = 0; i < 1000; i++) {
-                    Name name = nameFactory.createName();
-
-                    //logger.info("Name: " + name.first + " " + name.middle + " " + name.last);
-
-                    // Using the cPerson Class object, create a Person Instance.
-                    Instance iPerson = Instance.createPersistent(cPerson);
-
-                    //logger.info("iPerson OID: " + iPerson.getObjectId().toString());
-
-                    // We access the value of each attribute in the Instance using
-                    // a variable that we 'associate' with each attribute.
-                    Variable vFirstName = iPerson.getAttributeValue("FirstName");
-                    vFirstName.set(name.first);
-
-                    Variable vMiddleInitial = iPerson.getAttributeValue("MiddleName");
-                    vMiddleInitial.set(name.middle);
-
-                    Variable vLastName = iPerson.getAttributeValue("LastName");
-                    vLastName.set(name.last);
-
-
+                    
                     Address address = addressFactory.getAddress();
-                    Instance iAddress = Instance.createPersistent(cAddress);
+                    Instance iAddress = createAddress(address);
+                    
+                    int pCount = (i == 0)? 4 : (int)(Math.random() * 5);
+                    
+                    Name name;
+                    Instance iPerson;
+                    
+                    for (int p = 0; p < pCount; p++) {
+                        
+                        if (i == 0 && p == 0) {
+                            // Create a known Person vertex to aid in query demonstration.
+                            name = new Name("Male", "John", "Alfred", "Doe");
+                        } else {                        
+                            name = nameFactory.createName();                            
+                        }
+                        
+                        iPerson = createPerson(name);
+                    
+                        // We only have to set one end of the relationship.
+                        // The other end is set automatically based on the schema
+                        // definition.
+                        Variable vLivesHere = iAddress.getAttributeValue("LivesHere");
+                        com.objy.data.List livesHereList = vLivesHere.listValue();
 
-                    Variable vStreet1 = iAddress.getAttributeValue("Street1");
-                    vStreet1.set(address.number + " " + address.street);
+                        Instance iLivesEdge = Instance.createPersistent(cLivesEdge);
+                        Variable vLEPerson = iLivesEdge.getAttributeValue("ToPerson");
+                        vLEPerson.set(new Reference(iPerson));
 
-                    Variable vCity = iAddress.getAttributeValue("City");
-                    vCity.set(address.city);
-
-                    Variable vState = iAddress.getAttributeValue("State");
-                    vState.set(address.state);
-
-                    Variable vZIP = iAddress.getAttributeValue("ZIP");
-                    vZIP.set(address.zip);
-
-                    Variable vLat = iAddress.getAttributeValue("Latitude");
-                    vLat.set(address.latitude);
-
-                    Variable vLon = iAddress.getAttributeValue("Longitude");
-                    vLon.set(address.longitude);
-
-                    // Remember, we only have to set one end of the relationship.
-                    // The other end it set automatically based on the schema
-                    // definition.
-                    Variable vLivesHere = iAddress.getAttributeValue("LivesHere");
-                    com.objy.data.List livesHereList = vLivesHere.listValue();
-
-                    Instance iLivesEdge = Instance.createPersistent(cLivesEdge);
-                    Variable vLEPerson = iLivesEdge.getAttributeValue("ToPerson");
-                    vLEPerson.set(new Reference(iPerson));
-
-                    Variable vLEAddress = iLivesEdge.getAttributeValue("ToAddress");
-                    vLEAddress.set(new Reference(iAddress));
-
-
+                        Variable vLEAddress = iLivesEdge.getAttributeValue("ToAddress");
+                        vLEAddress.set(new Reference(iAddress));
+                    }
 
                     if ((i%100) == 0) {
-                        logger.info("Persons created: " + i);
+                        logger.info("Address created: " + i);
                     }
                 }
 
@@ -411,6 +400,55 @@ public class Lab05a {
         }
 
         return oid;
+    }
+    
+    private Instance createAddress(Address address) {
+        
+        Instance iAddress = Instance.createPersistent(cAddress);
+
+        Variable vStreet1 = iAddress.getAttributeValue("Street1");
+        vStreet1.set(address.number + " " + address.street);
+
+        Variable vCity = iAddress.getAttributeValue("City");
+        vCity.set(address.city);
+
+        Variable vState = iAddress.getAttributeValue("State");
+        vState.set(address.state);
+
+        Variable vZIP = iAddress.getAttributeValue("ZIP");
+        vZIP.set(address.zip);
+
+        Variable vLat = iAddress.getAttributeValue("Latitude");
+        vLat.set(address.latitude);
+
+        Variable vLon = iAddress.getAttributeValue("Longitude");
+        vLon.set(address.longitude);
+        
+        return iAddress;
+    }
+    
+    
+    
+    
+    private Instance createPerson(Name name) {       
+        
+        // Using the cPerson Class object, create a Person Instance.
+        Instance iPerson = Instance.createPersistent(cPerson);
+
+        //logger.info("iPerson OID: " + iPerson.getObjectId().toString());
+
+        // We access the value of each attribute in the Instance using
+        // a variable that we 'associate' with each attribute.
+        Variable vFirstName = iPerson.getAttributeValue("FirstName");
+        vFirstName.set(name.first);
+
+        Variable vMiddleInitial = iPerson.getAttributeValue("MiddleName");
+        vMiddleInitial.set(name.middle);
+
+        Variable vLastName = iPerson.getAttributeValue("LastName");
+        vLastName.set(name.last);
+        
+        return iPerson;
     }
 
 
@@ -442,24 +480,19 @@ public class Lab05a {
 
                 vStatementExecute = statement.execute();
 
-
+                // Get the sequenceValue of the results and then get an 
+                // iterator from that.
                 java.util.Iterator<Variable> it = vStatementExecute.sequenceValue().iterator();
                 if (!it.hasNext()) {
                     logger.info("There were no results on query:\n\n" + doQuery);
                 }
 
-                boolean headerPrinted = false;
-
                 int resultCount = 0;
                 while (it.hasNext()) {
-
                     Variable vProjection = it.next();
 
-                    //logger.info("vProjection is " + vProjection.getSpecification().getLogicalType().toString());
-
                     Instance iWalk = vProjection.instanceValue();
-                    displayInstance(iWalk);
-
+                    print(InstanceFormatter.format(iWalk));
 
                     resultCount++;
                 }
@@ -496,79 +529,82 @@ public class Lab05a {
     }
 
 
-    private void displayInstance(Instance ix) {
-
-        com.objy.data.Class cx = ix.getClass(true);
-
-        StringBuilder sb = new StringBuilder();
-
-        if (ix.getObjectId() != null) {
-            sb.append(String.format("        %-15s:    %-15s\n", "OID", ix.getObjectId().toString()));
-            sb.append(String.format("        %-15s:    %-15s\n", "Classname", ix.getClass(true).getName()));
-            sb.append("        - - - - - - - - - - - - - - - - - - - - - - - - - - -\n");
-        }
-        for (int i = 0; i < cx.getNumberOfAttributes(); i++) {
-            Attribute at = cx.getAttribute(i);
-            Variable v = ix.getAttributeValue(at.getName());
-
-            LogicalType lt = at.getAttributeValueSpecification().getFacet().getLogicalType();
-
-            switch (lt) {
-                case STRING:
-                    sb.append(String.format("        %-15s:    %-15s    \n", at.getName(), v.stringValue()));
-                    break;
-                case REFERENCE:
-                    sb.append(String.format("        %-15s:    %-15s    \n",  at.getName(), v.referenceValue().getObjectId().toString()));
-                    break;
-                case INSTANCE:
-                    sb.append(String.format("        %-15s:    %-15s    \n",  at.getName(), v.instanceValue().getObjectId().toString()));
-                    break;
-                case WALK:
-                    sb.append("==============================================\n");
-                    sb.append("WALK...\n");
-                    processWalk(v, sb);
-                    break;
+//    private void displayInstance(Instance ix) {
+//
+//        com.objy.data.Class cx = ix.getClass(true);
+//
+//        StringBuilder sb = new StringBuilder();
+//
+//        if (ix.getObjectId() != null) {
+//            sb.append(String.format("        %-15s:    %-15s\n", "OID", ix.getObjectId().toString()));
+//            sb.append(String.format("        %-15s:    %-15s\n", "Classname", ix.getClass(true).getName()));
+//            sb.append("        - - - - - - - - - - - - - - - - - - - - - - - - - - -\n");
+//        }
+//        for (int i = 0; i < cx.getNumberOfAttributes(); i++) {
+//            Attribute at = cx.getAttribute(i);
+//            Variable v = ix.getAttributeValue(at.getName());
+//
+//            LogicalType lt = at.getAttributeValueSpecification().getFacet().getLogicalType();
+//
+//            switch (lt) {
+//                case STRING:
+//                    sb.append(String.format("        %-15s:    %-15s    \n", at.getName(), v.stringValue()));
+//                    break;
+//                case REFERENCE:
+//                    sb.append(String.format("        %-15s:    %-15s    \n",  at.getName(), v.referenceValue().getObjectId().toString()));
+//                    break;
+//                case INSTANCE:
+//                    sb.append(String.format("        %-15s:    %-15s    \n",  at.getName(), v.instanceValue().getObjectId().toString()));
+//                    break;
+//                case WALK:
+//                    sb.append("==============================================\n");
+//                    sb.append("WALK...\n");
+//                    processWalk(v, sb);
+//                    break;
 //                default:
-//                    sb.append(String.format("%s : %-15s    ", at.getName(), "Not Handled"));
-            }
-        }
+//                    sb.append(String.format("%s : Type is %s      : %-15s    ", 
+//                            at.getName(), 
+//                            at.getAttributeValueSpecification().getLogicalType().toString(), 
+//                            "Not Handled"));
+//            }
+//        }
+//
+//        print(sb.toString());
+//    }
 
-        print(sb.toString());
-    }
 
-
-    private void processWalk(Variable vWalk, StringBuilder sb) {
-
-        Walk walk = vWalk.walkValue();
-
-        Instance iFrom = null;
-        Instance iTo = null;
-
-        Iterator<Variable> itEdges = walk.edges().iterator();
-        while (itEdges.hasNext()) {
-
-            Edge edge = itEdges.next().edgeValue();
-            
-            print("  Edge:");
-            print("      Edge ClassType: " + edge.edgeData().getClass(true).getName());
-            
-            if (iFrom == null) {
-                iFrom = edge.from();
-                print("    --------------------------------------------------");
-                print("    Node:");
-                displayInstance(iFrom);
-            }
-            iTo = edge.to();
-            print("    --------------------------------------------------");
-            print("    Node:");
-            displayInstance(iTo);
-
-//            logger.info("Got Edge: "
-//                    + " FROM: " + edge.from().getObjectId().toString()
-//                    + "  TO: " + edge.to().getObjectId().toString());
-
-        }
-    }
+//    private void processWalk(Variable vWalk, StringBuilder sb) {
+//
+//        Walk walk = vWalk.walkValue();
+//
+//        Instance iFrom = null;
+//        Instance iTo = null;
+//
+//        Iterator<Variable> itEdges = walk.edges().iterator();
+//        while (itEdges.hasNext()) {
+//
+//            Edge edge = itEdges.next().edgeValue();
+//            
+//            print("  Edge:");
+//            print("      Edge ClassType: " + edge.edgeData().getClass(true).getName());
+//            
+//            if (iFrom == null) {
+//                iFrom = edge.from();
+//                print("    --------------------------------------------------");
+//                print("    Node:");
+//                displayInstance(iFrom);
+//            }
+//            iTo = edge.to();
+//            print("    --------------------------------------------------");
+//            print("    Node:");
+//            displayInstance(iTo);
+//
+////            logger.info("Got Edge: "
+////                    + " FROM: " + edge.from().getObjectId().toString()
+////                    + "  TO: " + edge.to().getObjectId().toString());
+//
+//        }
+//    }
 
     private void displayHeader(Instance ix) {
 
