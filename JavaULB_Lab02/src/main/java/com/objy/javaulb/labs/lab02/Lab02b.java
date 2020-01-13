@@ -114,7 +114,9 @@ public class Lab02b {
                 // getAttrbutes() returns an Interator<Variable> object.
                 for (Variable v : cxPerson.getAttributes()) {
                     Attribute at = v.attributeValue();
-                    logger.info(String.format("Attribute:    %-20s    %s", at.getName(), at.getAttributeValueSpecification().getLogicalType()));
+                    logger.info(String.format("Attribute:    %-20s    %s", 
+                            at.getName(), 
+                            at.getAttributeValueSpecification().getLogicalType()));
                 }
                 
                 // Complete and close the transaction
@@ -124,7 +126,8 @@ public class Lab02b {
                 transactionSuccessful = true;
 
 	    } catch(LockConflictException lce) {
-		logger.info("LockConflictException. Attempting retry...  retryCount = " + ++transLCERetryCount);
+		logger.info("LockConflictException. Attempting retry...  retryCount = " 
+                        + ++transLCERetryCount);
 		try {
 		    Thread.sleep(10*transLCERetryCount);
 		} catch(InterruptedException ie) { }

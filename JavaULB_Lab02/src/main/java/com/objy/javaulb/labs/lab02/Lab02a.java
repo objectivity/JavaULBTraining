@@ -1,7 +1,6 @@
 package com.objy.javaulb.labs.lab02;
 
 import com.objy.data.schemaProvider.SchemaProvider;
-import com.objy.data.ClassBuilder;
 import com.objy.data.LogicalType;
 import com.objy.db.Connection;
 import com.objy.db.LockConflictException;

@@ -128,7 +128,7 @@ public class Lab03a {
                 tx.complete();
                 tx.close();
                 
-                logger.info("Person class created in schema.");
+                logger.info("Person instance created in database.");
 
                 transactionSuccessful = true;
 

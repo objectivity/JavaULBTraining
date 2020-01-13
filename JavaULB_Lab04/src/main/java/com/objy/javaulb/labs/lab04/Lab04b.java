@@ -264,11 +264,9 @@ public class Lab04b {
                 
                 Language doLang = LanguageRegistry.lookupLanguage("DO");
 
-                Variable vStatementExecute;
-
                 Statement statement = new Statement(doLang, doQuery);
 
-                vStatementExecute = statement.execute();
+                Variable vStatementExecute = statement.execute();
 
 
                 java.util.Iterator<Variable> it = vStatementExecute.sequenceValue().iterator();

@@ -184,7 +184,7 @@ public class Lab04a {
 
                 tx.close();
 
-                logger.info("Person class created in federation.");
+                logger.info("Person object created in federation.");
 
                 transactionSuccessful = true;
 
@@ -233,7 +233,6 @@ public class Lab04a {
 
                 // The complete writes the data out to the database.
                 tx.complete();
-
                 tx.close();
 
                 transactionSuccessful = true;
