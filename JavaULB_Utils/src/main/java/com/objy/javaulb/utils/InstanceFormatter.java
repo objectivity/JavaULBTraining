@@ -71,15 +71,9 @@ public class InstanceFormatter {
                 continue;
             }
 
-//            if (at == null) System.err.println(" at is null");
-//            if (v == null) System.err.println(" v is null");
-//            System.out.println("at.getName() = " + at.getName());
-//            if (at.getAttributeValueSpecification() == null) System.err.println(" at.getAttributeValueSpecification() is null");
-//            if (at.getAttributeValueSpecification().getFacet() == null) System.err.println(" at.getAttributeValueSpecification().getFacet() is null");
-//            if (at.getAttributeValueSpecification().getFacet().getLogicalType() == null) System.err.println(" at.getAttributeValueSpecification().getFacet().getLogicalType() is null");
-
-
+            // Process the attribute based on its logical type.
             LogicalType lt = at.getAttributeValueSpecification().getFacet().getLogicalType();
+//            sb.append(String.format("[%-10s]", lt));
 
             switch (lt) {
                 case STRING:
@@ -92,11 +86,11 @@ public class InstanceFormatter {
                     sb.append(String.format("        %-15s:    %-15s    \n",  at.getName(), v.instanceValue().getObjectId().toString()));
                     break;
                 case LIST:
-                    LogicalType atListOfLT = at.getAttributeValueSpecification().collectionFacet().getElementSpecification().getLogicalType();
+                    LogicalType ltOfListAttr = at.getAttributeValueSpecification().collectionFacet().getElementSpecification().getLogicalType();
 //                    sb.append("LIST of " + atListOfLT + "\n");
 
-                    sb.append(String.format("        %-15s:    [LIST of %s] \n                            {\n", at.getName(), atListOfLT));
-                    switch(atListOfLT) {
+                    sb.append(String.format("        %-15s:    [LIST of %s] \n                            {\n", at.getName(), ltOfListAttr));
+                    switch(ltOfListAttr) {
                         case REFERENCE:
                             processListOfRefs(at, v, sb);
                             break;

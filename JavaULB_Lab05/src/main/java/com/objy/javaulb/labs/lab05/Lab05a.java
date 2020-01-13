@@ -1,16 +1,11 @@
 package com.objy.javaulb.labs.lab05;
 
 import com.objy.data.Attribute;
-import com.objy.data.Edge;
 import com.objy.data.schemaProvider.SchemaProvider;
 import com.objy.data.Instance;
 import com.objy.data.LogicalType;
 import com.objy.data.Reference;
-import com.objy.data.Sequence;
 import com.objy.data.Variable;
-import com.objy.data.Walk;
-import com.objy.data.dataSpecificationBuilder.ListSpecificationBuilder;
-import com.objy.data.dataSpecificationBuilder.ReferenceSpecificationBuilder;
 import com.objy.db.Connection;
 import com.objy.db.LockConflictException;
 import com.objy.db.SessionLogging;
@@ -25,7 +20,6 @@ import com.objy.javaulb.labs.lab05.names.NameFactory;
 import com.objy.javaulb.utils.InstanceFormatter;
 import com.objy.statement.Statement;
 import java.io.File;
-import java.util.Iterator;
 import java.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,6 +46,13 @@ public class Lab05a {
     private NameFactory nameFactory;
     private AddressFactory addressFactory;
 
+    private com.objy.data.Class cPerson;
+    private com.objy.data.Class cAddress;
+    private com.objy.data.Class cLivesAtEdge;
+
+
+
+
     public Lab05a() {
 
         logger.info("Running " + this.getClass().getSimpleName());
@@ -72,35 +73,26 @@ public class Lab05a {
 
             openConnection(bootFile);
 
-            try {
-                createSchema();
-            }catch(Exception ex) {
-                ex.printStackTrace();
-                return;
-            }
-
-
             int count = 1;
             createData(count);
 
-            String doQuery1 = "MATCH p = (:Person {LastName == 'Doe'}) "
-                    + "-->(:Address) RETURN *";
+            String doQuery1 = "MATCH m = (:Person {LastName == 'Doe'}) "
+                    + "-->(:Address) RETURN m";
 
             matchQuery(doQuery1);
-            
-            
-//            String doQuery2 = "MATCH p = (:Person {LastName =~ '^Neal.*'}) "
-//                    + "-->(:Address)-->(:Person) RETURN *";
-//
-//            matchQuery(doQuery2);
-            
-            
-            String doQuery2 = "MATCH p = (:Person {LastName == 'Doe'}) "
-                    + "-->(:Address)-->(:Person) RETURN *";
+
+            String doQuery2 = "MATCH m = (:Person {LastName == 'Doe'}) "
+                                + "-->(:Address)-->(:Person) RETURN m";
 
             matchQuery(doQuery2);
-            
-            
+
+
+            String doQuery3 = "MATCH m = (p1:Person {LastName == 'Doe'}) "
+                                + "-->(a:Address)-->(p2:Person) RETURN p2";
+
+            matchQuery(doQuery3);
+
+
 //
 //            // Because Person contains a reference to Address called "LivesAt"
 //            // we can create a projection that includes attributes from both
@@ -179,142 +171,8 @@ public class Lab05a {
 
     }
 
-    private void createSchema() {
-
-        logger.info("createSchema() - Begin...");
-
-        int transLCERetryCount = 0;
-        boolean transactionSuccessful = false;
-        while (!transactionSuccessful) {
-            // Create a new TransactionScope that is READ_UPDATE.
-            try (TransactionScope tx = new TransactionScope(TransactionMode.READ_UPDATE)) {
-
-                // Ensure that our view of the schema is up to date.
-                SchemaProvider.getDefaultPersistentProvider().refresh(true);
-
-                com.objy.data.ClassBuilder cBuilder;
 
 
-                //--------------------------------------------------------------
-                logger.info("Creating Person...");
-
-                // Use ClassBuilder to create the schema definition.
-                cBuilder = new com.objy.data.ClassBuilder("Person");
-                cBuilder.addAttribute(LogicalType.STRING, "FirstName");
-                cBuilder.addAttribute(LogicalType.STRING, "LastName");
-                cBuilder.addAttribute(LogicalType.STRING, "MiddleName");
-
-                // Create the "LivesAt" end of the bidirectional to-many reference.
-                cBuilder.addAttribute("LivesAt",
-                            new ListSpecificationBuilder()
-                                .setCollectionName("SegmentedArray")
-                                .setElementSpecification(
-                                    new ReferenceSpecificationBuilder()
-                                            .setEdgeClass("LivesEdge")
-                                            .setEdgeAttribute("ToAddress")
-                                            .build())
-                                .build());
-
-                // Actually build the the schema representation.
-                com.objy.data.Class cPerson = cBuilder.build();
-
-                // Represent the new class into the federated database.
-                SchemaProvider.getDefaultPersistentProvider().represent(cPerson);
-
-
-
-                //--------------------------------------------------------------
-                logger.info("Creating Address...");
-
-                // Use ClassBuilder to create the schema definition.
-                cBuilder = new com.objy.data.ClassBuilder("Address");
-                cBuilder.addAttribute(LogicalType.STRING, "Street1");
-                cBuilder.addAttribute(LogicalType.STRING, "Street2");
-                cBuilder.addAttribute(LogicalType.STRING, "City");
-                cBuilder.addAttribute(LogicalType.STRING, "State");
-                cBuilder.addAttribute(LogicalType.STRING, "ZIP");
-
-                // Create the "LivesHere" end of the bidirectional to-many reference.
-                cBuilder.addAttribute("LivesHere",
-                            new ListSpecificationBuilder()
-                                .setCollectionName("SegmentedArray")
-                                .setElementSpecification(
-                                    new ReferenceSpecificationBuilder()
-                                            .setEdgeClass("LivesEdge")
-                                            .setEdgeAttribute("ToPerson")
-                                            .build())
-                                .build());
-
-                // Actually build the the schema representation.
-                com.objy.data.Class cAddress = cBuilder.build();
-
-                // Represent the new class into the federated database.
-                SchemaProvider.getDefaultPersistentProvider().represent(cAddress);
-
-
-
-                //--------------------------------------------------------------
-                logger.info("Creating LivesAt...");
-
-                // Use ClassBuilder to create the schema definition.
-                cBuilder = new com.objy.data.ClassBuilder("LivesEdge");
-
-                // Create the "LivesHere" end of the bidirectional to-many reference.
-                cBuilder.addAttribute("ToAddress",
-                            new ReferenceSpecificationBuilder()
-                                        .setReferencedClass("Address")
-                                        .setInverseAttribute("LivesHere")
-                                        .build());
-                
-                // Create the "LivesHere" end of the bidirectional to-many reference.
-                cBuilder.addAttribute("ToPerson",
-                            new ReferenceSpecificationBuilder()
-                                        .setReferencedClass("Person")
-                                        .setInverseAttribute("LivesAt")
-                                        .build());
-
-                // Actually build the the schema representation.
-                com.objy.data.Class cLivesAtEdge = cBuilder.build();
-
-                // Represent the new class into the federated database.
-                SchemaProvider.getDefaultPersistentProvider().represent(cLivesAtEdge);
-
-
-                SchemaProvider.getDefaultPersistentProvider().activateEdits();
-
-                logger.info("Calling tx.complete()...");
-
-
-                // Complete and close the transaction
-                tx.complete();
-                tx.close();
-
-                logger.info("Back from tx.close()");
-
-                transactionSuccessful = true;
-
-            } catch (LockConflictException lce) {
-                logger.info("LockConflictException. Attempting retry...  retryCount = " + ++transLCERetryCount);
-                try {
-                    Thread.sleep(10 * transLCERetryCount);
-                } catch (InterruptedException ie) {
-                }
-
-            } catch (Exception ex) {
-                logger.error("Error: ", ex);
-                ex.printStackTrace();
-                throw ex;
-            }
-        }
-
-        logger.info("createSchema() - Begin...");
-    }
-
-
-
-    private com.objy.data.Class cPerson;
-    private com.objy.data.Class cAddress;
-    private com.objy.data.Class cLivesEdge;
 
 
     private String createData(int count) {
@@ -333,42 +191,42 @@ public class Lab05a {
                 // Lookup the various classes from the schema in the ThingSpan federation.
                 cPerson = com.objy.data.Class.lookupClass("Person");
                 cAddress = com.objy.data.Class.lookupClass("Address");
-                cLivesEdge = com.objy.data.Class.lookupClass("LivesEdge");
+                cLivesAtEdge = com.objy.data.Class.lookupClass("LivesAtEdge");
 
 
                 // Create some addresses with people living at them.
                 for (int i = 0; i < 1000; i++) {
-                    
+
                     Address address = addressFactory.getAddress();
                     Instance iAddress = createAddress(address);
-                    
+
                     int pCount = (i == 0)? 4 : (int)(Math.random() * 5);
-                    
+
                     Name name;
                     Instance iPerson;
-                    
+
                     for (int p = 0; p < pCount; p++) {
-                        
+
                         if (i == 0 && p == 0) {
                             // Create a known Person vertex to aid in query demonstration.
                             name = new Name("Male", "John", "Alfred", "Doe");
-                        } else {                        
-                            name = nameFactory.createName();                            
+                        } else {
+                            name = nameFactory.createName();
                         }
-                        
+
                         iPerson = createPerson(name);
-                    
+
                         // We only have to set one end of the relationship.
                         // The other end is set automatically based on the schema
                         // definition.
                         Variable vLivesHere = iAddress.getAttributeValue("LivesHere");
                         com.objy.data.List livesHereList = vLivesHere.listValue();
 
-                        Instance iLivesEdge = Instance.createPersistent(cLivesEdge);
-                        Variable vLEPerson = iLivesEdge.getAttributeValue("ToPerson");
+                        Instance iLivesAtEdge = Instance.createPersistent(cLivesAtEdge);
+                        Variable vLEPerson = iLivesAtEdge.getAttributeValue("LivesHere");
                         vLEPerson.set(new Reference(iPerson));
 
-                        Variable vLEAddress = iLivesEdge.getAttributeValue("ToAddress");
+                        Variable vLEAddress = iLivesAtEdge.getAttributeValue("LivesAt");
                         vLEAddress.set(new Reference(iAddress));
                     }
 
@@ -401,9 +259,9 @@ public class Lab05a {
 
         return oid;
     }
-    
+
     private Instance createAddress(Address address) {
-        
+
         Instance iAddress = Instance.createPersistent(cAddress);
 
         Variable vStreet1 = iAddress.getAttributeValue("Street1");
@@ -423,15 +281,15 @@ public class Lab05a {
 
         Variable vLon = iAddress.getAttributeValue("Longitude");
         vLon.set(address.longitude);
-        
+
         return iAddress;
     }
-    
-    
-    
-    
-    private Instance createPerson(Name name) {       
-        
+
+
+
+
+    private Instance createPerson(Name name) {
+
         // Using the cPerson Class object, create a Person Instance.
         Instance iPerson = Instance.createPersistent(cPerson);
 
@@ -447,7 +305,7 @@ public class Lab05a {
 
         Variable vLastName = iPerson.getAttributeValue("LastName");
         vLastName.set(name.last);
-        
+
         return iPerson;
     }
 
@@ -480,7 +338,7 @@ public class Lab05a {
 
                 vStatementExecute = statement.execute();
 
-                // Get the sequenceValue of the results and then get an 
+                // Get the sequenceValue of the results and then get an
                 // iterator from that.
                 java.util.Iterator<Variable> it = vStatementExecute.sequenceValue().iterator();
                 if (!it.hasNext()) {
@@ -491,8 +349,8 @@ public class Lab05a {
                 while (it.hasNext()) {
                     Variable vProjection = it.next();
 
-                    Instance iWalk = vProjection.instanceValue();
-                    print(InstanceFormatter.format(iWalk));
+                    Instance iProjection = vProjection.instanceValue();
+                    print(InstanceFormatter.format(iProjection));
 
                     resultCount++;
                 }
@@ -562,9 +420,9 @@ public class Lab05a {
 //                    processWalk(v, sb);
 //                    break;
 //                default:
-//                    sb.append(String.format("%s : Type is %s      : %-15s    ", 
-//                            at.getName(), 
-//                            at.getAttributeValueSpecification().getLogicalType().toString(), 
+//                    sb.append(String.format("%s : Type is %s      : %-15s    ",
+//                            at.getName(),
+//                            at.getAttributeValueSpecification().getLogicalType().toString(),
 //                            "Not Handled"));
 //            }
 //        }
@@ -584,10 +442,10 @@ public class Lab05a {
 //        while (itEdges.hasNext()) {
 //
 //            Edge edge = itEdges.next().edgeValue();
-//            
+//
 //            print("  Edge:");
 //            print("      Edge ClassType: " + edge.edgeData().getClass(true).getName());
-//            
+//
 //            if (iFrom == null) {
 //                iFrom = edge.from();
 //                print("    --------------------------------------------------");

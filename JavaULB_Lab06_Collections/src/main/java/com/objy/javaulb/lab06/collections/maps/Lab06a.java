@@ -1,4 +1,4 @@
-package com.objy.javaulb.labs.lab05;
+package com.objy.javaulb.lab06.collections.maps;
 
 import com.objy.data.Attribute;
 import com.objy.data.Edge;
@@ -6,22 +6,18 @@ import com.objy.data.schemaProvider.SchemaProvider;
 import com.objy.data.Instance;
 import com.objy.data.LogicalType;
 import com.objy.data.Reference;
-import com.objy.data.Sequence;
 import com.objy.data.Variable;
 import com.objy.data.Walk;
 import com.objy.data.dataSpecificationBuilder.ListSpecificationBuilder;
 import com.objy.data.dataSpecificationBuilder.ReferenceSpecificationBuilder;
 import com.objy.db.Connection;
 import com.objy.db.LockConflictException;
+import com.objy.db.ObjectivityException;
 import com.objy.db.SessionLogging;
 import com.objy.db.TransactionMode;
 import com.objy.db.TransactionScope;
 import com.objy.expression.language.Language;
 import com.objy.expression.language.LanguageRegistry;
-import com.objy.javaulb.labs.lab05.addresses.Address;
-import com.objy.javaulb.labs.lab05.addresses.AddressFactory;
-import com.objy.javaulb.labs.lab05.names.Name;
-import com.objy.javaulb.labs.lab05.names.NameFactory;
 import com.objy.statement.Statement;
 import java.io.File;
 import java.util.Iterator;
@@ -33,9 +29,9 @@ import org.slf4j.LoggerFactory;
  *
  * @author Daniel
  */
-public class Lab05a {
+public class Lab06a {
 
-    private static Logger logger = LoggerFactory.getLogger(Lab05a.class);
+    private static Logger logger = LoggerFactory.getLogger(Lab06a.class);
 
 
     // The System.getProperties() value from which various things will be read.
@@ -48,24 +44,13 @@ public class Lab05a {
     private Connection connection;
 
 
-    private NameFactory nameFactory;
-    private AddressFactory addressFactory;
-
-    public Lab05a() {
+    public Lab06a() {
 
         logger.info("Running " + this.getClass().getSimpleName());
 
         try {
             validateProperties();
 
-
-
-            nameFactory = new NameFactory(
-                    System.getProperty("FEMALE_NAME_FILE"),
-                    System.getProperty("MALE_NAME_FILE"),
-                    System.getProperty("LAST_NAME_FILE"));
-
-            addressFactory = new AddressFactory(System.getProperty("ADDRESSES_FILE"));
 
             SessionLogging.setLoggingOptions(SessionLogging.LogAll, "D:/Root/temp");
 
@@ -77,49 +62,6 @@ public class Lab05a {
                 ex.printStackTrace();
                 return;
             }
-
-
-            int count = 1;
-            createData(count);
-
-            String doQuery1 = "MATCH p = (:Person {LastName =~ '^Ne.*'}) "
-                    + "-->(:Address) RETURN *";
-
-            matchQuery(doQuery1);
-            
-            
-            String doQuery2 = "MATCH p = (:Person {LastName =~ '^Ne.*'}) "
-                    + "-->(:Address)-->(:Person) RETURN *";
-
-            matchQuery(doQuery2);
-//
-//            // Because Person contains a reference to Address called "LivesAt"
-//            // we can create a projection that includes attributes from both
-//            // Person and Address. Here, we are traversing the LivesAt relationship
-//            // to pick up the LivesAt.City attribute but naming it "City" in
-//            // our projection.
-//            String doQuery2 = "FROM Person "
-//                    + "WHERE LastName =~ 'M.*' "
-//                    + "AND FirstName =~ 'T.*' "
-//                    + "RETURN LastName, FirstName, "
-//                    + "LivesAt.City as City, LivesAt.State as State";
-//            query(doQuery2);
-//
-//            String doQuery3 = "FROM Person "
-//                    + "WHERE LastName =~ 'M.*' "
-//                    + "AND FirstName =~ 'T.*' "
-//                    + "RETURN $$ID as oid, "
-//                    + "LastName, FirstName, "
-//                    + "LivesAt.City as City, LivesAt.State as State";
-//            query(doQuery3);
-//
-//            String doQuery4 = "FROM Person "
-//                    + "WHERE LivesAt.City =~ '^Sp.*' "
-//                    + "RETURN $$ID as oid, "
-//                    + "LastName, FirstName, "
-//                    + "LivesAt.City as City, LivesAt.State as State";
-//            query(doQuery4);
-
 
             closeConnection();
 
@@ -183,95 +125,35 @@ public class Lab05a {
                 // Ensure that our view of the schema is up to date.
                 SchemaProvider.getDefaultPersistentProvider().refresh(true);
 
-                com.objy.data.ClassBuilder cBuilder;
+                Language doLang = LanguageRegistry.lookupLanguage("DO");
+                Statement statement;
 
+                try {
 
-                //--------------------------------------------------------------
-                logger.info("Creating Person...");
+                    String doQuery
+                            = "UPDATE SCHEMA {\n"
+                            + "    CREATE CLASS KPPair {\n"
+                            + "         Key : String,\n"
+                            + "         Value : String\n"
+                            + "     }\n"
+                            + "    CREATE CLASS MyType {\n"
+                            + "         MyName : String,\n"
+                            + "         MyMap  : Map {\n"
+                            + "                     CollectionTypeName :NameToReferenceMap,\n"
+                            + "                     Key :String { Encoding: BYTE },\n"
+                            + "                     Element : Reference { Referenced: KVPair }\n"
+                            + "                 }\n"
+                            + "     }\n"
+                            + "}";
 
-                // Use ClassBuilder to create the schema definition.
-                cBuilder = new com.objy.data.ClassBuilder("Person");
-                cBuilder.addAttribute(LogicalType.STRING, "FirstName");
-                cBuilder.addAttribute(LogicalType.STRING, "LastName");
-                cBuilder.addAttribute(LogicalType.STRING, "MiddleName");
+                    logger.info("doQuery: <" + doQuery + ">");
+                    statement = new Statement(doLang, doQuery);
 
-                //
-                cBuilder.addAttribute("LivesAt",
-                            new ListSpecificationBuilder()
-                                .setCollectionName("SegmentedArray")
-                                .setElementSpecification(
-                                    new ReferenceSpecificationBuilder()
-                                            .setEdgeClass("LivesEdge")
-                                            .setEdgeAttribute("ToAddress")
-                                            .build())
-                                .build());
+                    statement.execute();
 
-                // Actually build the the schema representation.
-                com.objy.data.Class cPerson = cBuilder.build();
-
-                // Represent the new class into the federated database.
-                SchemaProvider.getDefaultPersistentProvider().represent(cPerson);
-
-
-
-                //--------------------------------------------------------------
-                logger.info("Creating Address...");
-
-                // Use ClassBuilder to create the schema definition.
-                cBuilder = new com.objy.data.ClassBuilder("Address");
-                cBuilder.addAttribute(LogicalType.STRING, "Street1");
-                cBuilder.addAttribute(LogicalType.STRING, "Street2");
-                cBuilder.addAttribute(LogicalType.STRING, "City");
-                cBuilder.addAttribute(LogicalType.STRING, "State");
-                cBuilder.addAttribute(LogicalType.STRING, "ZIP");
-
-                //
-                cBuilder.addAttribute("LivesHere",
-                            new ListSpecificationBuilder()
-                                .setCollectionName("SegmentedArray")
-                                .setElementSpecification(
-                                    new ReferenceSpecificationBuilder()
-                                            .setEdgeClass("LivesEdge")
-                                            .setEdgeAttribute("ToPerson")
-                                            .build())
-                                .build());
-
-                // Actually build the the schema representation.
-                com.objy.data.Class cAddress = cBuilder.build();
-
-                // Represent the new class into the federated database.
-                SchemaProvider.getDefaultPersistentProvider().represent(cAddress);
-
-
-
-                //--------------------------------------------------------------
-                logger.info("Creating LivesAt...");
-
-                // Use ClassBuilder to create the schema definition.
-                cBuilder = new com.objy.data.ClassBuilder("LivesEdge");
-                cBuilder.addAttribute(LogicalType.DATE, "From");
-                cBuilder.addAttribute(LogicalType.DATE, "To");
-
-                // Create the "LivesHere" end of the bidirectional to-many reference.
-                cBuilder.addAttribute("ToAddress",
-                            new ReferenceSpecificationBuilder()
-                                        .setReferencedClass("Address")
-                                        .setInverseAttribute("LivesHere")
-                                        .build());
-                cBuilder.addAttribute("ToPerson",
-                            new ReferenceSpecificationBuilder()
-                                        .setReferencedClass("Person")
-                                        .setInverseAttribute("LivesAt")
-                                        .build());
-
-                // Actually build the the schema representation.
-                com.objy.data.Class cLivesAtEdge = cBuilder.build();
-
-                // Represent the new class into the federated database.
-                SchemaProvider.getDefaultPersistentProvider().represent(cLivesAtEdge);
-
-
-                SchemaProvider.getDefaultPersistentProvider().activateEdits();
+                } catch (ObjectivityException oe) {
+                    oe.printStackTrace();
+                }
 
                 logger.info("Calling tx.complete()...");
 
@@ -298,7 +180,7 @@ public class Lab05a {
             }
         }
 
-        logger.info("createSchema() - Begin...");
+        logger.info("createSchema() - End...");
     }
 
 
@@ -548,10 +430,10 @@ public class Lab05a {
         while (itEdges.hasNext()) {
 
             Edge edge = itEdges.next().edgeValue();
-            
+
             print("  Edge:");
             print("      Edge ClassType: " + edge.edgeData().getClass(true).getName());
-            
+
             if (iFrom == null) {
                 iFrom = edge.from();
                 print("    --------------------------------------------------");
@@ -615,6 +497,6 @@ public class Lab05a {
 
 
     public static void main(String[] args) {
-        new Lab05a();
+        new Lab06a();
     }
 }

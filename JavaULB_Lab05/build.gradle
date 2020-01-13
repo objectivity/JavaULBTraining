@@ -53,12 +53,16 @@ if (System.getProperty('os.name').toLowerCase(Locale.ROOT).contains('windows')) 
 //==================================
 // FD Variables
 //==================================
-def fdname           = project.hasProperty('fdname')            ? project.fdname            : "${LAB_NAME}"
-def fddirhost        = project.hasProperty('fddirhost')         ? project.fddirhost         : InetAddress.getLocalHost().getHostName()
-def fddirpath        = project.hasProperty('fddirpath')         ? project.fddirpath         : "${BOOTFILE_DIR}"
-def jnldirhost       = project.hasProperty('jnldirhost')        ? project.jnldirhost        : InetAddress.getLocalHost().getHostName()
-def jnldirpath       = project.hasProperty('jnldirpath')        ? project.jnldirpath        : "${fddirpath}" + "/jnl"
-def bootfile		 = "${fddirpath}/${fdname}.boot"
+def fdname          = project.hasProperty('fdname')     ? project.fdname        : "${LAB_NAME}"
+def fddirhost       = project.hasProperty('fddirhost')  ? project.fddirhost     : InetAddress.getLocalHost().getHostName()
+def fddirpath       = project.hasProperty('fddirpath')  ? project.fddirpath     : "${BOOTFILE_DIR}"
+def jnldirhost      = project.hasProperty('jnldirhost') ? project.jnldirhost    : InetAddress.getLocalHost().getHostName()
+def jnldirpath      = project.hasProperty('jnldirpath') ? project.jnldirpath    : "${fddirpath}" + "/jnl"
+def bootfile        = "${fddirpath}/${fdname}.boot"
+
+def schema05aDOFile = PROJECT_DIR+"/data/scripts/schema05a.do"
+
+
 // When expressing the full, UNC path the "${fddirhost}::" causes havoc on Windows/DOS.
 
 
@@ -161,38 +165,26 @@ task recreateFD(){
     }
 }
 
+task loadSchema05a() {
+    dependsOn recreateFD
+    
+    doLast{        
 
-task run5a0() {
-
-    doLast{
-	println("Running 'run5a0'")
-        println("LIB_DIR = ${LIB_DIR}")
-        javaexec{
-            classpath("${LIB_DIR}/JavaULB_${LAB_NAME}-1.0-SNAPSHOT-all.jar",                    
-                     "${objyHome}/lib/objydb-core-${objyVersion}.jar")
-            jvmArgs = [\
-                "-Xmx8G", \
-                "-DBOOT_FILE=${bootfile}", \
-                "-DFEMALE_NAME_FILE=${project.rootDir}/data/gendata/dist.female.first.txt", \
-                "-DMALE_NAME_FILE=${project.rootDir}/data/gendata/dist.male.first.txt", \
-                "-DLAST_NAME_FILE=${project.rootDir}/data/gendata/dist.all.last.txt", \
-                "-DADDRESSES_FILE=${project.rootDir}/data/gendata/addresses.txt", \
-                "-Dlog4j.configuration=file:${PROJECT_DIR}/properties/log4j.properties"
-            ]
-            main = "com.objy.javaulb.labs.lab05.Lab05a0"
-            standardInput = System.in
-            if (project.hasProperty('args')) {
-                    args(args.split(','))
-            }
+        // Create FD
+        exec {
+            commandLine mycmd,  myflag, "objy DO -infile ${schema05aDOFile} -boot ${bootfile}"
+            ignoreExitValue = true
         }
+
     }
+    
 }
 
 
-task run5a() {
+task run05a() {
 
     doLast{
-	println("Running 'run5a'")
+	println("Running 'run05a'")
         println("LIB_DIR = ${LIB_DIR}")
         javaexec{
             classpath("${LIB_DIR}/JavaULB_${LAB_NAME}-1.0-SNAPSHOT-all.jar",                    
@@ -216,10 +208,40 @@ task run5a() {
 }
 
 
-task run5b() {
+task run05a0() {
 
     doLast{
-	println("Running 'run5b'")
+	println("Running 'run05a'")
+        println("LIB_DIR = ${LIB_DIR}")
+        javaexec{
+            classpath("${LIB_DIR}/JavaULB_${LAB_NAME}-1.0-SNAPSHOT-all.jar",                    
+                     "${objyHome}/lib/objydb-core-${objyVersion}.jar")
+            jvmArgs = [\
+                "-Xmx8G", \
+                "-DBOOT_FILE=${bootfile}", \
+                "-DFEMALE_NAME_FILE=${project.rootDir}/data/gendata/dist.female.first.txt", \
+                "-DMALE_NAME_FILE=${project.rootDir}/data/gendata/dist.male.first.txt", \
+                "-DLAST_NAME_FILE=${project.rootDir}/data/gendata/dist.all.last.txt", \
+                "-DADDRESSES_FILE=${project.rootDir}/data/gendata/addresses.txt", \
+                "-Dlog4j.configuration=file:${PROJECT_DIR}/properties/log4j.properties"
+            ]
+            main = "com.objy.javaulb.labs.lab05.Lab05a0"
+            standardInput = System.in
+            if (project.hasProperty('args')) {
+                    args(args.split(','))
+            }
+        }
+    }
+}
+
+
+
+
+
+task run05b() {
+
+    doLast{
+	println("Running 'run05b'")
         println("LIB_DIR = ${LIB_DIR}")
         javaexec{
             classpath("${LIB_DIR}/JavaULB_${LAB_NAME}-1.0-SNAPSHOT-all.jar",                    
