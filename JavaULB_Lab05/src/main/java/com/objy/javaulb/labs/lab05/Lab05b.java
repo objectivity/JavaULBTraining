@@ -1,16 +1,11 @@
 package com.objy.javaulb.labs.lab05;
 
 import com.objy.data.Attribute;
-import com.objy.data.Edge;
 import com.objy.data.schemaProvider.SchemaProvider;
 import com.objy.data.Instance;
 import com.objy.data.LogicalType;
 import com.objy.data.Reference;
-import com.objy.data.Sequence;
 import com.objy.data.Variable;
-import com.objy.data.Walk;
-import com.objy.data.dataSpecificationBuilder.ListSpecificationBuilder;
-import com.objy.data.dataSpecificationBuilder.ReferenceSpecificationBuilder;
 import com.objy.db.Connection;
 import com.objy.db.LockConflictException;
 import com.objy.db.SessionLogging;
@@ -22,9 +17,9 @@ import com.objy.javaulb.labs.lab05.addresses.Address;
 import com.objy.javaulb.labs.lab05.addresses.AddressFactory;
 import com.objy.javaulb.labs.lab05.names.Name;
 import com.objy.javaulb.labs.lab05.names.NameFactory;
+import com.objy.javaulb.utils.InstanceFormatter;
 import com.objy.statement.Statement;
 import java.io.File;
-import java.util.Iterator;
 import java.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,9 +28,9 @@ import org.slf4j.LoggerFactory;
  *
  * @author Daniel
  */
-public class Lab05b {
+public class Lab05a {
 
-    private static Logger logger = LoggerFactory.getLogger(Lab05b.class);
+    private static Logger logger = LoggerFactory.getLogger(Lab05a.class);
 
 
     // The System.getProperties() value from which various things will be read.
@@ -51,7 +46,14 @@ public class Lab05b {
     private NameFactory nameFactory;
     private AddressFactory addressFactory;
 
-    public Lab05b() {
+    private com.objy.data.Class cPerson;
+    private com.objy.data.Class cAddress;
+    private com.objy.data.Class cLivesAtEdge;
+
+
+
+
+    public Lab05a() {
 
         logger.info("Running " + this.getClass().getSimpleName());
 
@@ -71,20 +73,54 @@ public class Lab05b {
 
             openConnection(bootFile);
 
-            try {
-                createSchema();
-            }catch(Exception ex) {
-                ex.printStackTrace();
-                return;
-            }
-
-
             int count = 1;
             createData(count);
-            
-            int readCount = getCount();
 
-           
+            String doQuery1 = "MATCH m = (:Person {LastName == 'Doe'}) "
+                    + "-->(:Address) RETURN m";
+
+            matchQuery(doQuery1);
+
+            String doQuery2 = "MATCH m = (:Person {LastName == 'Doe'}) "
+                                + "-->(:Address)-->(:Person) RETURN m";
+
+            matchQuery(doQuery2);
+
+
+            String doQuery3 = "MATCH m = (p1:Person {LastName == 'Doe'}) "
+                                + "-->(a:Address)-->(p2:Person) RETURN p2";
+
+            matchQuery(doQuery3);
+
+
+//
+//            // Because Person contains a reference to Address called "LivesAt"
+//            // we can create a projection that includes attributes from both
+//            // Person and Address. Here, we are traversing the LivesAt relationship
+//            // to pick up the LivesAt.City attribute but naming it "City" in
+//            // our projection.
+//            String doQuery2 = "FROM Person "
+//                    + "WHERE LastName =~ 'M.*' "
+//                    + "AND FirstName =~ 'T.*' "
+//                    + "RETURN LastName, FirstName, "
+//                    + "LivesAt.City as City, LivesAt.State as State";
+//            query(doQuery2);
+//
+//            String doQuery3 = "FROM Person "
+//                    + "WHERE LastName =~ 'M.*' "
+//                    + "AND FirstName =~ 'T.*' "
+//                    + "RETURN $$ID as oid, "
+//                    + "LastName, FirstName, "
+//                    + "LivesAt.City as City, LivesAt.State as State";
+//            query(doQuery3);
+//
+//            String doQuery4 = "FROM Person "
+//                    + "WHERE LivesAt.City =~ '^Sp.*' "
+//                    + "RETURN $$ID as oid, "
+//                    + "LastName, FirstName, "
+//                    + "LivesAt.City as City, LivesAt.State as State";
+//            query(doQuery4);
+
 
             closeConnection();
 
@@ -135,139 +171,6 @@ public class Lab05b {
 
     }
 
-    private void createSchema() {
-
-        logger.info("createSchema() - Begin...");
-
-        int transLCERetryCount = 0;
-        boolean transactionSuccessful = false;
-        while (!transactionSuccessful) {
-            // Create a new TransactionScope that is READ_UPDATE.
-            try (TransactionScope tx = new TransactionScope(TransactionMode.READ_UPDATE)) {
-
-                // Ensure that our view of the schema is up to date.
-                SchemaProvider.getDefaultPersistentProvider().refresh(true);
-
-                com.objy.data.ClassBuilder cBuilder;
-
-
-                //--------------------------------------------------------------
-                logger.info("Creating Person...");
-
-                // Use ClassBuilder to create the schema definition.
-                cBuilder = new com.objy.data.ClassBuilder("Person");
-                cBuilder.addAttribute(LogicalType.STRING, "FirstName");
-                cBuilder.addAttribute(LogicalType.STRING, "LastName");
-                cBuilder.addAttribute(LogicalType.STRING, "MiddleName");
-
-                // Create the "LivesAt" end of the bidirectional to-many reference.
-                cBuilder.addAttribute("LivesAt",
-                            new ListSpecificationBuilder()
-                                .setCollectionName("SegmentedArray")
-                                .setElementSpecification(
-                                    new ReferenceSpecificationBuilder()
-                                            .setEdgeClass("LivesEdge")
-                                            .setEdgeAttribute("ToAddress")
-                                            .build())
-                                .build());
-
-                // Actually build the the schema representation.
-                com.objy.data.Class cPerson = cBuilder.build();
-
-                // Represent the new class into the federated database.
-                SchemaProvider.getDefaultPersistentProvider().represent(cPerson);
-
-
-
-                //--------------------------------------------------------------
-                logger.info("Creating Address...");
-
-                // Use ClassBuilder to create the schema definition.
-                cBuilder = new com.objy.data.ClassBuilder("Address");
-                cBuilder.addAttribute(LogicalType.STRING, "Street1");
-                cBuilder.addAttribute(LogicalType.STRING, "Street2");
-                cBuilder.addAttribute(LogicalType.STRING, "City");
-                cBuilder.addAttribute(LogicalType.STRING, "State");
-                cBuilder.addAttribute(LogicalType.STRING, "ZIP");
-
-                // Create the "LivesHere" end of the bidirectional to-many reference.
-                cBuilder.addAttribute("LivesHere",
-                            new ListSpecificationBuilder()
-                                .setCollectionName("SegmentedArray")
-                                .setElementSpecification(
-                                    new ReferenceSpecificationBuilder()
-                                            .setEdgeClass("LivesEdge")
-                                            .setEdgeAttribute("ToPerson")
-                                            .build())
-                                .build());
-
-                // Actually build the the schema representation.
-                com.objy.data.Class cAddress = cBuilder.build();
-
-                // Represent the new class into the federated database.
-                SchemaProvider.getDefaultPersistentProvider().represent(cAddress);
-
-
-
-                //--------------------------------------------------------------
-                logger.info("Creating LivesAt...");
-
-                // Use ClassBuilder to create the schema definition.
-                cBuilder = new com.objy.data.ClassBuilder("LivesEdge");
-                cBuilder.addAttribute(LogicalType.DATE, "From");
-                cBuilder.addAttribute(LogicalType.DATE, "To");
-
-                // Create the "LivesHere" end of the bidirectional to-many reference.
-                cBuilder.addAttribute("ToAddress",
-                            new ReferenceSpecificationBuilder()
-                                        .setReferencedClass("Address")
-                                        .setInverseAttribute("LivesHere")
-                                        .build());
-                
-                // Create the "LivesHere" end of the bidirectional to-many reference.
-                cBuilder.addAttribute("ToPerson",
-                            new ReferenceSpecificationBuilder()
-                                        .setReferencedClass("Person")
-                                        .setInverseAttribute("LivesAt")
-                                        .build());
-
-                // Actually build the the schema representation.
-                com.objy.data.Class cLivesAtEdge = cBuilder.build();
-
-                // Represent the new class into the federated database.
-                SchemaProvider.getDefaultPersistentProvider().represent(cLivesAtEdge);
-
-
-                SchemaProvider.getDefaultPersistentProvider().activateEdits();
-
-                logger.info("Calling tx.complete()...");
-
-
-                // Complete and close the transaction
-                tx.complete();
-                tx.close();
-
-                logger.info("Back from tx.close()");
-
-                transactionSuccessful = true;
-
-            } catch (LockConflictException lce) {
-                logger.info("LockConflictException. Attempting retry...  retryCount = " + ++transLCERetryCount);
-                try {
-                    Thread.sleep(10 * transLCERetryCount);
-                } catch (InterruptedException ie) {
-                }
-
-            } catch (Exception ex) {
-                logger.error("Error: ", ex);
-                ex.printStackTrace();
-                throw ex;
-            }
-        }
-
-        logger.info("createSchema() - Begin...");
-    }
-
 
 
 
@@ -285,73 +188,50 @@ public class Lab05b {
                 // Ensure that our view of the schema is up to date.
                 SchemaProvider.getDefaultPersistentProvider().refresh(true);
 
-                // Lookup the Person class from the schema in the ThingSpan federation.
-                com.objy.data.Class cPerson = com.objy.data.Class.lookupClass("Person");
+                // Lookup the various classes from the schema in the ThingSpan federation.
+                cPerson = com.objy.data.Class.lookupClass("Person");
+                cAddress = com.objy.data.Class.lookupClass("Address");
+                cLivesAtEdge = com.objy.data.Class.lookupClass("LivesAtEdge");
 
-                com.objy.data.Class cAddress = com.objy.data.Class.lookupClass("Address");
-                com.objy.data.Class cLivesEdge = com.objy.data.Class.lookupClass("LivesEdge");
 
-
+                // Create some addresses with people living at them.
                 for (int i = 0; i < 1000; i++) {
-                    Name name = nameFactory.createName();
-
-                    //logger.info("Name: " + name.first + " " + name.middle + " " + name.last);
-
-                    // Using the cPerson Class object, create a Person Instance.
-                    Instance iPerson = Instance.createPersistent(cPerson);
-
-                    //logger.info("iPerson OID: " + iPerson.getObjectId().toString());
-
-                    // We access the value of each attribute in the Instance using
-                    // a variable that we 'associate' with each attribute.
-                    Variable vFirstName = iPerson.getAttributeValue("FirstName");
-                    vFirstName.set(name.first);
-
-                    Variable vMiddleInitial = iPerson.getAttributeValue("MiddleName");
-                    vMiddleInitial.set(name.middle);
-
-                    Variable vLastName = iPerson.getAttributeValue("LastName");
-                    vLastName.set(name.last);
-
 
                     Address address = addressFactory.getAddress();
-                    Instance iAddress = Instance.createPersistent(cAddress);
+                    Instance iAddress = createAddress(address);
 
-                    Variable vStreet1 = iAddress.getAttributeValue("Street1");
-                    vStreet1.set(address.number + " " + address.street);
+                    int pCount = (i == 0)? 4 : (int)(Math.random() * 5);
 
-                    Variable vCity = iAddress.getAttributeValue("City");
-                    vCity.set(address.city);
+                    Name name;
+                    Instance iPerson;
 
-                    Variable vState = iAddress.getAttributeValue("State");
-                    vState.set(address.state);
+                    for (int p = 0; p < pCount; p++) {
 
-                    Variable vZIP = iAddress.getAttributeValue("ZIP");
-                    vZIP.set(address.zip);
+                        if (i == 0 && p == 0) {
+                            // Create a known Person vertex to aid in query demonstration.
+                            name = new Name("Male", "John", "Alfred", "Doe");
+                        } else {
+                            name = nameFactory.createName();
+                        }
 
-                    Variable vLat = iAddress.getAttributeValue("Latitude");
-                    vLat.set(address.latitude);
+                        iPerson = createPerson(name);
 
-                    Variable vLon = iAddress.getAttributeValue("Longitude");
-                    vLon.set(address.longitude);
+                        // We only have to set one end of the relationship.
+                        // The other end is set automatically based on the schema
+                        // definition.
+                        Variable vLivesHere = iAddress.getAttributeValue("LivesHere");
+                        com.objy.data.List livesHereList = vLivesHere.listValue();
 
-                    // Remember, we only have to set one end of the relationship.
-                    // The other end it set automatically based on the schema
-                    // definition.
-                    Variable vLivesHere = iAddress.getAttributeValue("LivesHere");
-                    com.objy.data.List livesHereList = vLivesHere.listValue();
+                        Instance iLivesAtEdge = Instance.createPersistent(cLivesAtEdge);
+                        Variable vLEPerson = iLivesAtEdge.getAttributeValue("LivesHere");
+                        vLEPerson.set(new Reference(iPerson));
 
-                    Instance iLivesEdge = Instance.createPersistent(cLivesEdge);
-                    Variable vLEPerson = iLivesEdge.getAttributeValue("ToPerson");
-                    vLEPerson.set(new Reference(iPerson));
-
-                    Variable vLEAddress = iLivesEdge.getAttributeValue("ToAddress");
-                    vLEAddress.set(new Reference(iAddress));
-
-
+                        Variable vLEAddress = iLivesAtEdge.getAttributeValue("LivesAt");
+                        vLEAddress.set(new Reference(iAddress));
+                    }
 
                     if ((i%100) == 0) {
-                        logger.info("Persons created: " + i);
+                        logger.info("Address created: " + i);
                     }
                 }
 
@@ -380,8 +260,65 @@ public class Lab05b {
         return oid;
     }
 
+    private Instance createAddress(Address address) {
 
-    private int getCount() {
+        Instance iAddress = Instance.createPersistent(cAddress);
+
+        Variable vStreet1 = iAddress.getAttributeValue("Street1");
+        vStreet1.set(address.number + " " + address.street);
+
+        Variable vCity = iAddress.getAttributeValue("City");
+        vCity.set(address.city);
+
+        Variable vState = iAddress.getAttributeValue("State");
+        vState.set(address.state);
+
+        Variable vZIP = iAddress.getAttributeValue("ZIP");
+        vZIP.set(address.zip);
+
+        Variable vLat = iAddress.getAttributeValue("Latitude");
+        vLat.set(address.latitude);
+
+        Variable vLon = iAddress.getAttributeValue("Longitude");
+        vLon.set(address.longitude);
+
+        return iAddress;
+    }
+
+
+
+
+    private Instance createPerson(Name name) {
+
+        // Using the cPerson Class object, create a Person Instance.
+        Instance iPerson = Instance.createPersistent(cPerson);
+
+        //logger.info("iPerson OID: " + iPerson.getObjectId().toString());
+
+        // We access the value of each attribute in the Instance using
+        // a variable that we 'associate' with each attribute.
+        Variable vFirstName = iPerson.getAttributeValue("FirstName");
+        vFirstName.set(name.first);
+
+        Variable vMiddleInitial = iPerson.getAttributeValue("MiddleName");
+        vMiddleInitial.set(name.middle);
+
+        Variable vLastName = iPerson.getAttributeValue("LastName");
+        vLastName.set(name.last);
+
+        return iPerson;
+    }
+
+
+    private void matchQuery(String doQuery) {
+
+        print("");
+        print("");
+        print("========================================================");
+        print("QUERY: " + doQuery);
+        print("--------------------------------------------------------");
+
+        String oid = null;
 
         int transLCERetryCount = 0;
         boolean transactionSuccessful = false;
@@ -397,14 +334,12 @@ public class Lab05b {
 
                 Variable vStatementExecute;
 
-                String doQuery = "FROM Person RETURN COUNT(*)";
-               
                 Statement statement = new Statement(doLang, doQuery);
 
                 vStatementExecute = statement.execute();
 
-                logger.info("vStatementExecute logicalType is: " + vStatementExecute.getSpecification().getLogicalType().toString());
-
+                // Get the sequenceValue of the results and then get an
+                // iterator from that.
                 java.util.Iterator<Variable> it = vStatementExecute.sequenceValue().iterator();
                 if (!it.hasNext()) {
                     logger.info("There were no results on query:\n\n" + doQuery);
@@ -412,22 +347,11 @@ public class Lab05b {
 
                 int resultCount = 0;
                 while (it.hasNext()) {
-
                     Variable vProjection = it.next();
 
-                    logger.info("vProjection is " + vProjection.getSpecification().getLogicalType().toString());
+                    Instance iProjection = vProjection.instanceValue();
+                    print(InstanceFormatter.format(iProjection));
 
-                    Instance iCount = vProjection.instanceValue();                    
-                    
-                    
-                    for (int i = 0; i < iCount.getClass(true).getNumberOfAttributes(); i++) {                        
-                        Attribute attr = iCount.getClass(true).getAttribute(i);                        
-                        logger.info("Attribute: " + attr.getName());                        
-                    }
-                    
-                    int count = iCount.getAttributeValue("COUNT(*)").intValue();
-                    logger.info("count = " + count);
-                    
                     resultCount++;
                 }
 
@@ -460,84 +384,85 @@ public class Lab05b {
         print("========================================================");
         print("");
         print("");
-        
-        return 0;
     }
 
 
-    private void displayInstance(Instance ix) {
-
-        com.objy.data.Class cx = ix.getClass(true);
-
-        StringBuilder sb = new StringBuilder();
-
-        if (ix.getObjectId() != null) {
-            sb.append(String.format("        %-15s:    %-15s\n", "OID", ix.getObjectId().toString()));
-            sb.append(String.format("        %-15s:    %-15s\n", "Classname", ix.getClass(true).getName()));
-            sb.append("        - - - - - - - - - - - - - - - - - - - - - - - - - - -\n");
-        }
-        for (int i = 0; i < cx.getNumberOfAttributes(); i++) {
-            Attribute at = cx.getAttribute(i);
-            Variable v = ix.getAttributeValue(at.getName());
-
-            LogicalType lt = at.getAttributeValueSpecification().getFacet().getLogicalType();
-
-            switch (lt) {
-                case STRING:
-                    sb.append(String.format("        %-15s:    %-15s    \n", at.getName(), v.stringValue()));
-                    break;
-                case REFERENCE:
-                    sb.append(String.format("        %-15s:    %-15s    \n",  at.getName(), v.referenceValue().getObjectId().toString()));
-                    break;
-                case INSTANCE:
-                    sb.append(String.format("        %-15s:    %-15s    \n",  at.getName(), v.instanceValue().getObjectId().toString()));
-                    break;
-                case WALK:
-                    sb.append("==============================================\n");
-                    sb.append("WALK...\n");
-                    processWalk(v, sb);
-                    break;
+//    private void displayInstance(Instance ix) {
+//
+//        com.objy.data.Class cx = ix.getClass(true);
+//
+//        StringBuilder sb = new StringBuilder();
+//
+//        if (ix.getObjectId() != null) {
+//            sb.append(String.format("        %-15s:    %-15s\n", "OID", ix.getObjectId().toString()));
+//            sb.append(String.format("        %-15s:    %-15s\n", "Classname", ix.getClass(true).getName()));
+//            sb.append("        - - - - - - - - - - - - - - - - - - - - - - - - - - -\n");
+//        }
+//        for (int i = 0; i < cx.getNumberOfAttributes(); i++) {
+//            Attribute at = cx.getAttribute(i);
+//            Variable v = ix.getAttributeValue(at.getName());
+//
+//            LogicalType lt = at.getAttributeValueSpecification().getFacet().getLogicalType();
+//
+//            switch (lt) {
+//                case STRING:
+//                    sb.append(String.format("        %-15s:    %-15s    \n", at.getName(), v.stringValue()));
+//                    break;
+//                case REFERENCE:
+//                    sb.append(String.format("        %-15s:    %-15s    \n",  at.getName(), v.referenceValue().getObjectId().toString()));
+//                    break;
+//                case INSTANCE:
+//                    sb.append(String.format("        %-15s:    %-15s    \n",  at.getName(), v.instanceValue().getObjectId().toString()));
+//                    break;
+//                case WALK:
+//                    sb.append("==============================================\n");
+//                    sb.append("WALK...\n");
+//                    processWalk(v, sb);
+//                    break;
 //                default:
-//                    sb.append(String.format("%s : %-15s    ", at.getName(), "Not Handled"));
-            }
-        }
+//                    sb.append(String.format("%s : Type is %s      : %-15s    ",
+//                            at.getName(),
+//                            at.getAttributeValueSpecification().getLogicalType().toString(),
+//                            "Not Handled"));
+//            }
+//        }
+//
+//        print(sb.toString());
+//    }
 
-        print(sb.toString());
-    }
 
-
-    private void processWalk(Variable vWalk, StringBuilder sb) {
-
-        Walk walk = vWalk.walkValue();
-
-        Instance iFrom = null;
-        Instance iTo = null;
-
-        Iterator<Variable> itEdges = walk.edges().iterator();
-        while (itEdges.hasNext()) {
-
-            Edge edge = itEdges.next().edgeValue();
-            
-            print("  Edge:");
-            print("      Edge ClassType: " + edge.edgeData().getClass(true).getName());
-            
-            if (iFrom == null) {
-                iFrom = edge.from();
-                print("    --------------------------------------------------");
-                print("    Node:");
-                displayInstance(iFrom);
-            }
-            iTo = edge.to();
-            print("    --------------------------------------------------");
-            print("    Node:");
-            displayInstance(iTo);
-
-//            logger.info("Got Edge: "
-//                    + " FROM: " + edge.from().getObjectId().toString()
-//                    + "  TO: " + edge.to().getObjectId().toString());
-
-        }
-    }
+//    private void processWalk(Variable vWalk, StringBuilder sb) {
+//
+//        Walk walk = vWalk.walkValue();
+//
+//        Instance iFrom = null;
+//        Instance iTo = null;
+//
+//        Iterator<Variable> itEdges = walk.edges().iterator();
+//        while (itEdges.hasNext()) {
+//
+//            Edge edge = itEdges.next().edgeValue();
+//
+//            print("  Edge:");
+//            print("      Edge ClassType: " + edge.edgeData().getClass(true).getName());
+//
+//            if (iFrom == null) {
+//                iFrom = edge.from();
+//                print("    --------------------------------------------------");
+//                print("    Node:");
+//                displayInstance(iFrom);
+//            }
+//            iTo = edge.to();
+//            print("    --------------------------------------------------");
+//            print("    Node:");
+//            displayInstance(iTo);
+//
+////            logger.info("Got Edge: "
+////                    + " FROM: " + edge.from().getObjectId().toString()
+////                    + "  TO: " + edge.to().getObjectId().toString());
+//
+//        }
+//    }
 
     private void displayHeader(Instance ix) {
 
@@ -584,6 +509,6 @@ public class Lab05b {
 
 
     public static void main(String[] args) {
-        new Lab05b();
+        new Lab05a();
     }
 }
