@@ -66,16 +66,15 @@ public class InstanceFormatter {
             Attribute at = cx.getAttribute(i);
             Variable v = ix.getAttributeValue(at.getName());
 
-            if (at.getAttributeValueSpecification().getFacet() == null) {
-                sb.append(String.format("        %-15s:    [null facet - No Data]    \n", at.getName()));
-                continue;
-            }
-
             // Process the attribute based on its logical type.
-            LogicalType lt = at.getAttributeValueSpecification().getFacet().getLogicalType();
-//            sb.append(String.format("[%-10s]", lt));
+            LogicalType lt = at.getAttributeValueSpecification().getLogicalType();
 
             switch (lt) {
+                case DATE:
+                    com.objy.data.Date date = v.dateValue();
+                    String sDate = String.format("%d/%d/%d", date.getDay(), date.getMonth(), date.getYear());
+                    sb.append(String.format("        %-15s:    %-15s    \n", at.getName(), sDate));
+                    break;                    
                 case STRING:
                     sb.append(String.format("        %-15s:    %-15s    \n", at.getName(), v.stringValue()));
                     break;
@@ -123,18 +122,13 @@ public class InstanceFormatter {
 
         com.objy.data.List list = v.listValue();
 
-
-
         for (int i = 0; i < list.size(); i++) {
             sb.append(String.format("                               %s",
                     list.get(i).referenceValue().getObjectId().toString()));
             if (i != list.size()-1) {
                 sb.append(",\n");
             }
-
         }
-
-
     }
 
 

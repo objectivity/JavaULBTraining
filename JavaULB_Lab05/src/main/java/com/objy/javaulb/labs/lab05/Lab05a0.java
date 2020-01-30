@@ -17,10 +17,10 @@ import com.objy.db.TransactionMode;
 import com.objy.db.TransactionScope;
 import com.objy.expression.language.Language;
 import com.objy.expression.language.LanguageRegistry;
-import com.objy.javaulb.labs.lab05.addresses.Address;
-import com.objy.javaulb.labs.lab05.addresses.AddressFactory;
-import com.objy.javaulb.labs.lab05.names.Name;
-import com.objy.javaulb.labs.lab05.names.NameFactory;
+import com.objy.javaulb.utils.addresses.Address;
+import com.objy.javaulb.utils.addresses.AddressFactory;
+import com.objy.javaulb.utils.names.Name;
+import com.objy.javaulb.utils.names.NameFactory;
 import com.objy.statement.Statement;
 import java.io.File;
 import java.util.Iterator;
@@ -57,21 +57,16 @@ public class Lab05a0 {
         try {
             validateProperties();
 
+            nameFactory = new NameFactory();
 
-
-            nameFactory = new NameFactory(
-                    System.getProperty("FEMALE_NAME_FILE"),
-                    System.getProperty("MALE_NAME_FILE"),
-                    System.getProperty("LAST_NAME_FILE"));
-
-            addressFactory = new AddressFactory(System.getProperty("ADDRESSES_FILE"));
+            addressFactory = new AddressFactory();
 
             SessionLogging.setLoggingOptions(SessionLogging.LogAll, "D:/Root/temp");
 
             openConnection(bootFile);
 
             try {
-                createSchema();
+                SchemaFactory.createSchema();
             }catch(Exception ex) {
                 ex.printStackTrace();
                 return;
@@ -332,7 +327,7 @@ public class Lab05a0 {
                 com.objy.data.Class cLivesEdge = com.objy.data.Class.lookupClass("LivesEdge");
 
 
-                for (int i = 0; i < 1000; i++) {
+                for (int i = 0; i < count; i++) {
                     Name name = nameFactory.createName();
 
                     //logger.info("Name: " + name.first + " " + name.middle + " " + name.last);
@@ -439,7 +434,6 @@ public class Lab05a0 {
 
                 // Ensure that our view of the schema is up to date.
                 SchemaProvider.getDefaultPersistentProvider().refresh(true);
-
 
                 Language doLang = LanguageRegistry.lookupLanguage("DO");
 

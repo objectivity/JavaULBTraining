@@ -3,14 +3,16 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.objy.javaulb.labs.addresses;
+package com.objy.javaulb.utils.addresses;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Properties;
 import java.util.Random;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,11 +32,40 @@ public class AddressFactory {
 
 
     private Random random = new Random();
+    private Properties properties;
 
 
 
-    public AddressFactory(String addressFilename) throws FileNotFoundException, IOException {
-        this.addressFilename = addressFilename;
+    public AddressFactory() throws FileNotFoundException, IOException, Exception {
+        
+        String appConfig = System.getProperty("AppConfig");
+        if (appConfig == null) {
+            throw new Exception("Missing environment variable 'AppConfig'. Use '-DAppConfig=<path>'");
+        }        
+        logger.info("AppConfig = " + appConfig);
+        
+        String dataDir = System.getProperty("DataDir");
+        if (dataDir == null) {
+            throw new Exception("Missing environment variable 'DataDir'. Use '-DDataDir=<path>'");
+        }
+        logger.info("DataDir = " + dataDir);
+        
+        File appConfigFile = new File(appConfig);
+        if (!appConfigFile.exists()) {
+            throw new FileNotFoundException("AppConfig file not found: " + appConfig);
+        }
+        
+        FileInputStream inStream;
+        try {
+            inStream = new FileInputStream(appConfigFile);
+        } catch(IOException ioe) {
+            throw new IOException("Unable to read: " + appConfig);
+        }
+        
+        properties = new Properties();
+        properties.load(inStream);
+               
+        this.addressFilename = dataDir + File.separator + (String)properties.get("data.addresses");;
 
         File addressFile = new File(this.addressFilename);
         if (!addressFile.exists()) {

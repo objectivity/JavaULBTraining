@@ -3,14 +3,16 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.objy.javaulb.labs.names;
+package com.objy.javaulb.utils.names;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Properties;
 import java.util.Random;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,13 +39,44 @@ public class NameFactory {
     private int lastListSize;
     
     private Random random = new Random();
+    private Properties properties;
     
     
     
-    public NameFactory(String femaleNameFilename, String maleNameFilename, String lastNameFilename) throws FileNotFoundException, IOException {        
-        this.femaleNameFilename = femaleNameFilename;
-        this.maleNameFilename = maleNameFilename;
-        this.lastNameFilename = lastNameFilename;
+    public NameFactory() throws FileNotFoundException, IOException, Exception {  
+        
+        String appConfig = System.getProperty("AppConfig");
+        if (appConfig == null) {
+            throw new Exception("Missing environment variable 'AppConfig'. Use '-DAppConfig=<path>'");
+        }        
+        logger.info("AppConfig = " + appConfig);
+        
+        String dataDir = System.getProperty("DataDir");
+        if (dataDir == null) {
+            throw new Exception("Missing environment variable 'DataDir'. Use '-DDataDir=<path>'");
+        }
+        logger.info("DataDir = " + dataDir);
+        
+        File appConfigFile = new File(appConfig);
+        if (!appConfigFile.exists()) {
+            throw new FileNotFoundException("AppConfig file not found: " + appConfig);
+        }
+        
+        FileInputStream inStream;
+        try {
+            inStream = new FileInputStream(appConfigFile);
+        } catch(IOException ioe) {
+            throw new IOException("Unable to read: " + appConfig);
+        }
+        
+        properties = new Properties();
+        properties.load(inStream);
+        
+        
+        femaleNameFilename = dataDir + File.separator + (String)properties.get("data.names.first.female");
+        maleNameFilename   = dataDir + File.separator + (String)properties.get("data.names.first.male");
+        lastNameFilename   = dataDir + File.separator + (String)properties.get("data.names.last");
+        
         
         File femaleNameFile = new File(this.femaleNameFilename);
         if (!femaleNameFile.exists()) {

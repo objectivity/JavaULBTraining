@@ -72,10 +72,10 @@ def schema05aDOFile = PROJECT_DIR+"/data/scripts/schema05a.do"
 project (':JavaULB_Lab05') {
     dependencies {
         compile project(path: ':JavaULB_Utils', configuration: 'shadow')
-        
+
         // Third party dependency
         compile files("$objyHome/lib/objydb-core-${objyVersion}.jar")
-        
+
         compile 'org.slf4j:slf4j-api:1.8.0-beta1'
         compile 'org.slf4j:slf4j-log4j12:1.8.0-beta1'
         compile 'log4j:log4j:1.2.17'
@@ -83,14 +83,14 @@ project (':JavaULB_Lab05') {
 
     // Start shadowJar task before test phase
     test.dependsOn("shadowJar")
-    
-    
+
+
     // Configure the shadow jar task
     shadowJar {
         zip64 true
         dependencies {
             include(dependency(':JavaULB_Utils'))
-            
+
             include(dependency('com.objy.objydb:objydb-core:.*'))
 
             include(dependency('org.slf4j:slf4j-api:1.8.0-beta1'))
@@ -99,6 +99,8 @@ project (':JavaULB_Lab05') {
         }
     }
 }
+
+
 
 //==================================
 // Tasks
@@ -192,10 +194,8 @@ task run05a() {
             jvmArgs = [\
                 "-Xmx8G", \
                 "-DBOOT_FILE=${bootfile}", \
-                "-DFEMALE_NAME_FILE=${project.rootDir}/data/gendata/dist.female.first.txt", \
-                "-DMALE_NAME_FILE=${project.rootDir}/data/gendata/dist.male.first.txt", \
-                "-DLAST_NAME_FILE=${project.rootDir}/data/gendata/dist.all.last.txt", \
-                "-DADDRESSES_FILE=${project.rootDir}/data/gendata/addresses.txt", \
+                "-DAppConfig=${ROOT_PROJECT_DIR}/config/AppConfig.properties", \
+                "-DDataDir=${GENDATA_DIR}", \
                 "-Dlog4j.configuration=file:${PROJECT_DIR}/properties/log4j.properties"
             ]
             main = "com.objy.javaulb.labs.lab05.Lab05a"
@@ -206,37 +206,6 @@ task run05a() {
         }
     }
 }
-
-
-task run05a0() {
-
-    doLast{
-	println("Running 'run05a'")
-        println("LIB_DIR = ${LIB_DIR}")
-        javaexec{
-            classpath("${LIB_DIR}/JavaULB_${LAB_NAME}-1.0-SNAPSHOT-all.jar",                    
-                     "${objyHome}/lib/objydb-core-${objyVersion}.jar")
-            jvmArgs = [\
-                "-Xmx8G", \
-                "-DBOOT_FILE=${bootfile}", \
-                "-DFEMALE_NAME_FILE=${project.rootDir}/data/gendata/dist.female.first.txt", \
-                "-DMALE_NAME_FILE=${project.rootDir}/data/gendata/dist.male.first.txt", \
-                "-DLAST_NAME_FILE=${project.rootDir}/data/gendata/dist.all.last.txt", \
-                "-DADDRESSES_FILE=${project.rootDir}/data/gendata/addresses.txt", \
-                "-Dlog4j.configuration=file:${PROJECT_DIR}/properties/log4j.properties"
-            ]
-            main = "com.objy.javaulb.labs.lab05.Lab05a0"
-            standardInput = System.in
-            if (project.hasProperty('args')) {
-                    args(args.split(','))
-            }
-        }
-    }
-}
-
-
-
-
 
 task run05b() {
 
@@ -249,10 +218,8 @@ task run05b() {
             jvmArgs = [\
                 "-Xmx8G", \
                 "-DBOOT_FILE=${bootfile}", \
-                "-DFEMALE_NAME_FILE=${project.rootDir}/data/gendata/dist.female.first.txt", \
-                "-DMALE_NAME_FILE=${project.rootDir}/data/gendata/dist.male.first.txt", \
-                "-DLAST_NAME_FILE=${project.rootDir}/data/gendata/dist.all.last.txt", \
-                "-DADDRESSES_FILE=${project.rootDir}/data/gendata/addresses.txt", \
+                "-DAppConfig=${ROOT_PROJECT_DIR}/config/AppConfig.properties", \
+                "-DDataDir=${GENDATA_DIR}", \
                 "-Dlog4j.configuration=file:${PROJECT_DIR}/properties/log4j.properties"
             ]
             main = "com.objy.javaulb.labs.lab05.Lab05b"
@@ -263,6 +230,11 @@ task run05b() {
         }
     }
 }
+
+
+
+
+
 
 
 

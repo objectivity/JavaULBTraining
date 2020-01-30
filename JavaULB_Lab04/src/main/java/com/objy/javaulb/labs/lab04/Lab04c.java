@@ -11,8 +11,8 @@ import com.objy.db.TransactionMode;
 import com.objy.db.TransactionScope;
 import com.objy.expression.language.Language;
 import com.objy.expression.language.LanguageRegistry;
-import com.objy.javaulb.labs.names.Name;
-import com.objy.javaulb.labs.names.NameFactory;
+import com.objy.javaulb.utils.names.Name;
+import com.objy.javaulb.utils.names.NameFactory;
 import com.objy.statement.Statement;
 import java.io.File;
 import java.util.Properties;
@@ -51,10 +51,7 @@ public class Lab04c {
 
 
 
-            nameFactory = new NameFactory(
-                    System.getProperty("FEMALE_NAME_FILE"),
-                    System.getProperty("MALE_NAME_FILE"),
-                    System.getProperty("LAST_NAME_FILE"));
+            nameFactory = new NameFactory();
 
 
             openConnection(bootFile);

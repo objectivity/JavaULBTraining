@@ -12,9 +12,9 @@ import com.objy.db.TransactionMode;
 import com.objy.db.TransactionScope;
 import com.objy.expression.language.Language;
 import com.objy.expression.language.LanguageRegistry;
-import com.objy.javaulb.labs.names.Name;
-import com.objy.javaulb.labs.names.NameFactory;
 import com.objy.statement.Statement;
+import com.objy.javaulb.utils.names.Name;
+import com.objy.javaulb.utils.names.NameFactory;
 import java.io.File;
 import java.util.Properties;
 import org.slf4j.Logger;
@@ -51,12 +51,7 @@ public class Lab04b {
             validateProperties();
 
 
-
-            nameFactory = new NameFactory(
-                    System.getProperty("FEMALE_NAME_FILE"),
-                    System.getProperty("MALE_NAME_FILE"),
-                    System.getProperty("LAST_NAME_FILE"));
-
+            nameFactory = new NameFactory();
 
             openConnection(bootFile);
 
@@ -274,7 +269,6 @@ public class Lab04b {
                     logger.info("There were no results on query:\n\n" + doQuery);
                 }
                 
-                boolean headerPrinted = false;
 
                 int resultCount = 0;
                 while (it.hasNext()) {
@@ -284,8 +278,7 @@ public class Lab04b {
                     Instance ix = vResult.instanceValue();
 
 //                    displayPersonInstance(iPerson);
-                    if (!headerPrinted) {
-                        headerPrinted = true;
+                    if (resultCount++ == 0) {
                         displayHeader(ix);
                     }
 

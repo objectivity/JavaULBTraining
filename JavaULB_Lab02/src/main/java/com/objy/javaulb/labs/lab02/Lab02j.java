@@ -50,15 +50,13 @@ public class Lab02j {
             
             readSchema("Person");
             readSchema("Employee");
-
+            
             closeConnection();
 
         } catch (Exception ex) {
             logger.error("Error: ", ex);
             return;
         }
-
-
     }
 
 
@@ -244,6 +242,8 @@ public class Lab02j {
     }
 
 
+    
+    
     public static void main(String[] args) {
         new Lab02j();
     }
