@@ -1,4 +1,6 @@
 
+/docs/~*
+
 /build/**
 
 /JavaULB_Lab01/build/**
@@ -13,10 +15,14 @@
 /JavaULB_Lab04/build/**
 /JavaULB_Lab04/data/dbs/**
 
+/JavaULB_Lab05/build/**
+/JavaULB_Lab05/data/dbs/**
 
+/JavaULB_Lab06_Collections/build/**
+/JavaULB_Lab06_Collections/data/dbs/**
+
+/JavaULB_Utils/build/**
 
 /.gradle/**
 /.nb-gradle/**
-/JavaULB_Lab05/build/
-/JavaULB_Lab06_Collections/build/
-/JavaULB_Utils/build/
+
