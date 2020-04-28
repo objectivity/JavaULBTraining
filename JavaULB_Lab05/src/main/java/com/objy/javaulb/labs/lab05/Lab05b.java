@@ -12,7 +12,7 @@ import com.objy.db.TransactionMode;
 import com.objy.db.TransactionScope;
 import com.objy.expression.language.Language;
 import com.objy.expression.language.LanguageRegistry;
-import com.objy.javaulb.utils.InstanceFormatter;
+import com.objy.javaulb.utils.LabUtils;
 import com.objy.statement.Statement;
 import java.io.File;
 import java.util.Properties;
@@ -49,28 +49,28 @@ public class Lab05b {
         logger.info("Running " + this.getClass().getSimpleName());
 
         try {
-            validateProperties();            
+            bootFile = LabUtils.validateBootfile();            
 
             SessionLogging.setLoggingOptions(SessionLogging.LogAll, "D:/Root/temp");
 
-            openConnection(bootFile);            
-           
-            SchemaFactory.createSchema();
-            
-            DataFactory dataFactory = new DataFactory();
-            
-            int addressCount = 100;
-            dataFactory.createData(addressCount);
+            LabUtils.openConnection(bootFile);            
+                      
+            DataFactory df = new DataFactory();            
+            df.createData(20);            
             
 
+            String doQuery1 = "MATCH path = (:Person) --> (:Address) RETURN path";
+            query(doQuery1);
             
+            String doQuery2 = "MATCH path = (:Person {LastName =~~ '^S.*'}) --> (:Address) RETURN path";
+            query(doQuery2);
+    
+            String doQuery3 = "MATCH path = (:Person {FirstName == 'John' "
+                                + "&& LastName == 'Doe'}) "
+                                + "-->(:Address)-->(:Person) return path;";
+            query(doQuery3);
             
-            
-            
-            
-            
-            
-            closeConnection();
+            LabUtils.closeConnection();
 
         } catch (Exception ex) {
             logger.error("Error: ", ex);
@@ -79,61 +79,17 @@ public class Lab05b {
 
     }
 
-    private void validateProperties() throws Exception {
-
-        properties = System.getProperties();
-
-        String bootFileProperty = System.getProperty("BOOT_FILE");
-        if (bootFileProperty == null) {
-            String msg = "BOOT_FILE property not defined.";
-            logger.error(msg);
-            throw new Exception(msg);
-        }
-
-        bootFile = bootFileProperty.replace('/', File.separatorChar);
-
-        logger.info("bootFile: <" + bootFile + ">");
-
-        File f = new File(bootFile);
-        if (!f.exists()) {
-            logger.error("Boot file is invalid. It does not exist: <" + bootFile + ">");
-        } else {
-            logger.info("Boot file is valid: " + bootFile);
-        }
-
-    }
-
-    private void openConnection(String bootFile) throws Exception {
-
-        connection = new Connection(bootFile);
-
-        logger.info("Connected to ThingSpan federation: " + bootFile);
-
-    }
-
-    private void closeConnection() throws Exception {
-
-        connection.dispose();
-
-        logger.info("Disconnected from ThingSpan federation: " + bootFile);
-
-    }
+    
 
     
     
-
-
-
-
-
-    private void matchQuery(String doQuery) {
+    private void query(String doQuery) {
 
         print("");
         print("");
         print("========================================================");
         print("QUERY: " + doQuery);
         print("--------------------------------------------------------");
-
 
         int transLCERetryCount = 0;
         boolean transactionSuccessful = false;
@@ -144,16 +100,12 @@ public class Lab05b {
                 // Ensure that our view of the schema is up to date.
                 SchemaProvider.getDefaultPersistentProvider().refresh(true);
 
-                Language doLang = LanguageRegistry.lookupLanguage("DO");
+                boolean headerPrinted = false;
 
-                Variable vStatementExecute;
-
+                Language doLang = LanguageRegistry.lookupLanguage("DO");                
                 Statement statement = new Statement(doLang, doQuery);
+                Variable vStatementExecute = statement.execute();
 
-                vStatementExecute = statement.execute();
-
-                // Get the sequenceValue of the results and then get an
-                // iterator from that.
                 java.util.Iterator<Variable> it = vStatementExecute.sequenceValue().iterator();
                 if (!it.hasNext()) {
                     logger.info("There were no results on query:\n\n" + doQuery);
@@ -161,10 +113,14 @@ public class Lab05b {
 
                 int resultCount = 0;
                 while (it.hasNext()) {
-                    Variable vProjection = it.next();
+                    Variable vResult = it.next();
+                    Instance ix = vResult.instanceValue();
 
-                    Instance iProjection = vProjection.instanceValue();
-                    print(InstanceFormatter.format(iProjection));
+                    if (!headerPrinted) {
+                        headerPrinted = true;
+                        displayHeader(ix);
+                    }
+                    displayInstance(ix);
 
                     resultCount++;
                 }
@@ -201,16 +157,167 @@ public class Lab05b {
     }
 
 
+    private void displayInstance(Instance ix) {
+
+        com.objy.data.Class cx = ix.getClass(true);
+
+        StringBuilder sb = new StringBuilder();
 
 
+        try {
+            String oid = ix.getObjectId().toString();
+            sb.append(String.format("        %12s: %s\n", "OID", oid));
+            sb.append(String.format("        %12s: %s\n", "Type", ix.getClass(true).getName()));            
+        } catch(NullPointerException npe) {
+        }
+        
+        
+        for (int i = 0; i < cx.getNumberOfAttributes(); i++) {
+            Attribute at = cx.getAttribute(i);
+            Variable v = ix.getAttributeValue(at.getName());
+
+            LogicalType lt = at.getAttributeValueSpecification().getFacet().getLogicalType();
+            
+            sb.append(String.format("        %12s: ", at.getName()));
+            switch (lt) {
+                case STRING:
+                    sb.append(String.format("%s", v.stringValue()));
+                    break;
+                case REFERENCE:
+//                    String field = atName + ": [" + v.referenceValue().getObjectId().toString() + "]";
+                    sb.append(String.format("%s", v.referenceValue().getObjectId().toString()));
+                    break;
+                case WALK:
+                    // The current attribute of the projection instance is a WALK. 
+                    // Extract this attrbute and process it as a walk.
+                    com.objy.data.Walk walk = ix.getAttributeValue(at.getName()).walkValue();
+                    processWalk(walk);
+                    break;
+                default:
+                    sb.append(String.format("[Not Handled: %s]", lt.toString()));
+            }
+            sb.append("\n");
+        }
+
+        print(sb.toString());
+    }
+    
+    
+    
+    
+    /**
+     * A Walk consists of a sequence of com.objy.data.Edge objects. Each Edge 
+     * object looks like:
+    *   _Projection
+    *       {
+    *       p:WALK
+    *       {
+    *           EDGE
+    *           {
+    *               from:3-3-1-40,              // OID of from object
+    *               fromClass:'Person',         // Class of from object
+    *               attribute:'LivesAt',        // Name of attribute in from object that points to edge.
+    *               edgeData:3-3-1-44,          // OID of edge object with edge data
+    *               edgeDataClass:'LivesAtEdge',// Class of edge data object
+    *               to:3-3-1-37,                // OID of to object
+    *               toClass:'Address'           // Class of to object
+    *           }
+    *       }
+    *   }
+     * 
+     * 
+     * 
+     * 
+     * 
+     * 
+     * @param walk 
+     */
+    private void processWalk(com.objy.data.Walk walk) {
+
+        boolean showFromObject = true; // Only show the from object the first time.
 
 
+        System.out.println("=================================================");
+
+        System.out.println("WALK:");
+
+        for (Variable v : walk.edges()) {
+            com.objy.data.Edge edge = v.edgeValue();
+
+            if (showFromObject) {
+                showFromObject = false;
+
+                Instance iFrom = edge.from();
+
+                System.out.println("-------------------------------------------------");
+                System.out.println("Node:");
+
+                displayInstance(iFrom);
+                System.out.println();
+            }
+
+            System.out.println("Edge:");
+            Instance iEdgeData = edge.edgeData();
+            displayInstance(iEdgeData);
+            System.out.println();           
+
+
+            System.out.println("Node:");
+            Instance iTo = edge.to();
+            displayInstance(iTo);
+            System.out.println();
+
+        }
+
+
+    }
+
+
+    private void displayHeader(Instance ix) {
+
+        com.objy.data.Class cx = ix.getClass(true);
+
+        StringBuilder sb = new StringBuilder();
+        StringBuilder sbSeparator = new StringBuilder();
+
+        for (int i = 0; i < cx.getNumberOfAttributes(); i++) {
+            Attribute at = cx.getAttribute(i);
+            Variable v = ix.getAttributeValue(at.getName());
+
+            LogicalType lt = at.getAttributeValueSpecification().getFacet().getLogicalType();
+
+            sb.append(String.format("%-15s    ", at.getName()));
+            sbSeparator.append("---------------    ");
+        }
+        print(sb.toString());
+        
+        sb = new StringBuilder();
+        
+        for (int i = 0; i < cx.getNumberOfAttributes(); i++) {
+            Attribute at = cx.getAttribute(i);
+            Variable v = ix.getAttributeValue(at.getName());
+
+            LogicalType lt = at.getAttributeValueSpecification().getFacet().getLogicalType();
+            
+            sb.append(String.format("%-15s    ", lt.toString()));
+        }
+
+        print(sb.toString());        
+        print(sbSeparator.toString());
+    }
+
+
+    
     private void print(String s) {
-
+        
         System.out.println(s);
-
+        
 //        logger.info(s);
     }
+
+
+    
+    
 
 
 

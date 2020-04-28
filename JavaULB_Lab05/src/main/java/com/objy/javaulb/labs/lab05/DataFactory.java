@@ -28,7 +28,7 @@ public class DataFactory {
     
     private com.objy.data.Class cPerson;
     private com.objy.data.Class cAddress;
-    private com.objy.data.Class cLivesEdge;
+    private com.objy.data.Class cLivesAtEdge;
     
     
     private NameFactory nameFactory;
@@ -60,7 +60,7 @@ public class DataFactory {
                 // Lookup the various classes from the schema in the ThingSpan federation.
                 cPerson = com.objy.data.Class.lookupClass("Person");
                 cAddress = com.objy.data.Class.lookupClass("Address");
-                cLivesEdge = com.objy.data.Class.lookupClass("LivesEdge");
+                cLivesAtEdge = com.objy.data.Class.lookupClass("LivesAtEdge");
 
 
                 // Create some addresses with people living at them.
@@ -93,7 +93,7 @@ public class DataFactory {
                         // We only have to set one end of the relationship.
                         // The other end is set automatically based on the schema
                         // definition.
-                        Instance iLivesEdge = Instance.createPersistent(cLivesEdge);
+                        Instance iLivesEdge = Instance.createPersistent(cLivesAtEdge);
                         
                         Variable vLEPerson = iLivesEdge.getAttributeValue("ToPerson");
                         vLEPerson.set(new Reference(iPerson));
@@ -137,7 +137,7 @@ public class DataFactory {
 
         Instance iAddress = Instance.createPersistent(cAddress);
 
-        Variable vStreet1 = iAddress.getAttributeValue("Street1");
+        Variable vStreet1 = iAddress.getAttributeValue("Street");
         vStreet1.set(address.number + " " + address.street);
 
         Variable vCity = iAddress.getAttributeValue("City");

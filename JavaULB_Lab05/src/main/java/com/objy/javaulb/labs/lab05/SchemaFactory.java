@@ -82,6 +82,9 @@ public class SchemaFactory {
                 cBuilder.addAttribute(LogicalType.STRING, "State");
                 cBuilder.addAttribute(LogicalType.STRING, "ZIP");
 
+                
+
+                
                 cBuilder.addAttribute("LivesHere",
                             new ListSpecificationBuilder()
                                 .setCollectionName("SegmentedArray")
