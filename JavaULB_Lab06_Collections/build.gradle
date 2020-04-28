@@ -68,6 +68,8 @@ def bootfile		 = "${fddirpath}/${fdname}.boot"
 
 project (':JavaULB_Lab06_Collections') {
     dependencies {
+        compile project(path: ':JavaULB_Utils', configuration: 'shadow')
+
         // Third party dependency
         compile files("$objyHome/lib/objydb-core-${objyVersion}.jar")
 
@@ -78,12 +80,14 @@ project (':JavaULB_Lab06_Collections') {
 
     // Start shadowJar task before test phase
     test.dependsOn("shadowJar")
-    
-    
+
+
     // Configure the shadow jar task
     shadowJar {
         zip64 true
         dependencies {
+            include(dependency(':JavaULB_Utils'))
+
             include(dependency('com.objy.objydb:objydb-core:.*'))
 
             include(dependency('org.slf4j:slf4j-api:1.8.0-beta1'))

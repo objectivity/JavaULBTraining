@@ -8,8 +8,6 @@ import com.objy.data.LogicalType;
 import com.objy.data.Reference;
 import com.objy.data.Variable;
 import com.objy.data.Walk;
-import com.objy.data.dataSpecificationBuilder.ListSpecificationBuilder;
-import com.objy.data.dataSpecificationBuilder.ReferenceSpecificationBuilder;
 import com.objy.db.Connection;
 import com.objy.db.LockConflictException;
 import com.objy.db.ObjectivityException;
@@ -18,6 +16,10 @@ import com.objy.db.TransactionMode;
 import com.objy.db.TransactionScope;
 import com.objy.expression.language.Language;
 import com.objy.expression.language.LanguageRegistry;
+import com.objy.javaulb.utils.addresses.Address;
+import com.objy.javaulb.utils.addresses.AddressFactory;
+import com.objy.javaulb.utils.names.Name;
+import com.objy.javaulb.utils.names.NameFactory;
 import com.objy.statement.Statement;
 import java.io.File;
 import java.util.Iterator;
@@ -187,9 +189,12 @@ public class Lab06a {
 
 
 
-    private String createData(int count) {
+    private String createData(int count) throws Exception {
 
         String oid = null;
+        
+        NameFactory nameFactory = new NameFactory();
+        AddressFactory addressFactory = new AddressFactory();
 
         int transLCERetryCount = 0;
         boolean transactionSuccessful = false;
