@@ -1,19 +1,19 @@
 UPDATE SCHEMA
 {
-    CREATE CLASS APerson
+    CREATE CLASS B_Person
     {
 		FirstName:	STRING,
 		LastName:	STRING,
         LivesAt
              : List {
                  element: Reference {
-                     edgeClass:      LivesAt,
-                     edgeAttribute:  LivesAt
+                     edgeClass:      B_LivesEdge,
+                     edgeAttribute:  ToAddress
                   },
                   CollectionTypeName: SegmentedArray
                 }
     }
-    CREATE CLASS AAddress
+    CREATE CLASS B_Address
     {
 		Street:		STRING,
 		City:		STRING,
@@ -21,16 +21,16 @@ UPDATE SCHEMA
         LivesHere
               : List {
                   element: Reference {
-                      edgeClass:      	LivesAt,
-                      edgeAttribute: 	LivesHere
+                      edgeClass:      	B_LivesEdge,
+                      edgeAttribute: 	ToPerson
                    },
                    CollectionTypeName: SegmentedArray
                 }
     }
-    CREATE CLASS LivesAt
+    CREATE CLASS B_LivesEdge
     {
-       LivesAt 		: Reference {referenced: AAddress, inverse: LivesHere },
-       LivesHere	: Reference {referenced: APerson, inverse: LivesAt }
+       ToAddress 		: Reference {referenced: B_Address, inverse: LivesHere },
+       ToPerson			: Reference {referenced: B_Person,  inverse: LivesAt }
     }
 };
 

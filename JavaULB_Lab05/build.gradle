@@ -61,6 +61,7 @@ def jnldirpath      = project.hasProperty('jnldirpath') ? project.jnldirpath    
 def bootfile        = "${fddirpath}/${fdname}.boot"
 
 def schema05aDOFile = PROJECT_DIR+"/data/scripts/schema05a.do"
+def schema05bDOFile = PROJECT_DIR+"/data/scripts/schema05b.do"
 
 
 // When expressing the full, UNC path the "${fddirhost}::" causes havoc on Windows/DOS.
@@ -170,21 +171,19 @@ task recreateFD(){
 task loadSchema05a() {
     dependsOn recreateFD
     
-    doLast{        
-
+    doLast{
         // Create FD
         exec {
             commandLine mycmd,  myflag, "objy DO -infile ${schema05aDOFile} -boot ${bootfile}"
             ignoreExitValue = true
         }
-
-    }
-    
+    }    
 }
 
 
 task run05a() {
-
+    dependsOn recreateFD
+    
     doLast{
 	println("Running 'run05a'")
         println("LIB_DIR = ${LIB_DIR}")
@@ -207,7 +206,22 @@ task run05a() {
     }
 }
 
+
+
+task loadSchema05b() {    
+    dependsOn recreateFD
+    
+    doLast{
+        // Create FD
+        exec {
+            commandLine mycmd,  myflag, "objy DO -infile ${schema05bDOFile} -boot ${bootfile}"
+            ignoreExitValue = true
+        }
+    }    
+}
+
 task run05b() {
+    dependsOn loadSchema05b
 
     doLast{
 	println("Running 'run05b'")
