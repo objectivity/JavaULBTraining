@@ -19,9 +19,9 @@ import org.slf4j.LoggerFactory;
  *
  * @author Daniel
  */
-public class Lab02i {
+public class Lab02k {
 
-    private static Logger logger = LoggerFactory.getLogger(Lab02i.class);
+    private static Logger logger = LoggerFactory.getLogger(Lab02k.class);
 
     // The System.getProperties() value from which various things will be read.
     private Properties properties;
@@ -36,7 +36,7 @@ public class Lab02i {
 
 
 
-    public Lab02i() {
+    public Lab02k() {
 
         logger.info("Running " + this.getClass().getSimpleName());
 
@@ -104,9 +104,8 @@ public class Lab02i {
 
 
     /**
-     * This function will create two classes, an Egg class and a Carton class.
-     * The Carton class has an attribute that is a list of references to Egg 
-     * objects.
+     * This function will create two classes, a Geolocation class and an
+     * Address class.
      */
     private void createSchema() {
 
@@ -115,55 +114,58 @@ public class Lab02i {
 	while (!transactionSuccessful) {
             // Create a new TransactionScope that is READ_UPDATE.
             try (TransactionScope tx = new TransactionScope(TransactionMode.READ_UPDATE)) {
-                
+
                 // Ensure that our view of the schema is up to date.
                 SchemaProvider.getDefaultPersistentProvider().refresh(true);
-                
-                
+
                 //--------------------------------------------------------------
                 // Use ClassBuilder to create the schema definition.
-                com.objy.data.ClassBuilder cBuilderPhoneNumber = new com.objy.data.ClassBuilder("PhoneNumber");
-                cBuilderPhoneNumber.addAttribute(LogicalType.STRING, "Number");
-                
+                com.objy.data.ClassBuilder cBuilderGeoLoc = new com.objy.data.ClassBuilder("GeoLocation");
+                cBuilderGeoLoc.setEmbeddable();
+                cBuilderGeoLoc.addAttribute("Latitude",
+                                      new RealSpecificationBuilder(Storage.Real.B64)
+                                            .setEncoding(Encoding.Real.IEEE)
+                                            .build());
+                cBuilderGeoLoc.addAttribute("Longitude",
+                                      new RealSpecificationBuilder(Storage.Real.B64)
+                                            .setEncoding(Encoding.Real.IEEE)
+                                            .build());
+
                 // Actually build the the schema representation.
-                com.objy.data.Class cPhoneNumber = cBuilderPhoneNumber.build();
-                
+                com.objy.data.Class cGeoLoc = cBuilderGeoLoc.build();
+
+
                 // Represent the new class into the federated database.
-                SchemaProvider.getDefaultPersistentProvider().represent(cPhoneNumber);
-                
-                
-                
-                //--------------------------------------------------------------
-                // Use ClassBuilder to create the schema definition.
-                com.objy.data.ClassBuilder cBuilderPerson = new com.objy.data.ClassBuilder("Person");
-                cBuilderPerson.addAttribute(LogicalType.STRING, "FirstName");
-                cBuilderPerson.addAttribute(LogicalType.STRING, "LastName");
-                cBuilderPerson.addAttribute(LogicalType.STRING, "MiddleInitial");
-                cBuilderPerson.addAttribute(LogicalType.DATE, "Birthdate"); 
-                
-                cBuilderPerson.addAttribute("PhoneNumbers", 
-                         new SetSpecificationBuilder()
-                                .setCollectionName("TreeSetOfReferences")
-                                .setElementSpecification(
-                                    new ReferenceSpecificationBuilder()
-                                            .setReferencedClass("PhoneNumber")
-                                            .build())   
-                                .build());
-                
+                SchemaProvider.getDefaultPersistentProvider().represent(cGeoLoc);
+
+
+
+                com.objy.data.ClassBuilder cBuilderAddress = new com.objy.data.ClassBuilder("Address");
+                cBuilderAddress.addAttribute(LogicalType.STRING, "Street1");
+                cBuilderAddress.addAttribute(LogicalType.STRING, "Street2");
+                cBuilderAddress.addAttribute(LogicalType.STRING, "City");
+                cBuilderAddress.addAttribute(LogicalType.STRING, "State");
+                cBuilderAddress.addAttribute(LogicalType.STRING, "ZIP");
+
+                cBuilderAddress.addAttribute("GeoLocation", new InstanceSpecificationBuilder()
+                                    .setClass("GeoLocation")
+                                    .build());
+
                 // Actually build the the schema representation.
-                com.objy.data.Class cPerson = cBuilderPerson.build();
-                
+                com.objy.data.Class cAddress = cBuilderAddress.build();
+
                 // Represent the new class into the federated database.
-                SchemaProvider.getDefaultPersistentProvider().represent(cPerson);
-                
+                SchemaProvider.getDefaultPersistentProvider().represent(cAddress);
+
                 // Process the schema changes.
                 SchemaProvider.getDefaultPersistentProvider().activateEdits();
-                
-                
+
+
+
                 // Complete and close the transaction
                 tx.complete();
                 tx.close();
-                
+
                 logger.info("Person class created in schema.");
 
                 transactionSuccessful = true;
@@ -183,6 +185,6 @@ public class Lab02i {
 
 
     public static void main(String[] args) {
-        new Lab02i();
+        new Lab02k();
     }
 }

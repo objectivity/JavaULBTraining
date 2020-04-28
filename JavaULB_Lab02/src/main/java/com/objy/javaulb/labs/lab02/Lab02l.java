@@ -18,9 +18,9 @@ import org.slf4j.LoggerFactory;
  *
  * @author Daniel
  */
-public class Lab02j {
+public class Lab02l {
 
-    private static Logger logger = LoggerFactory.getLogger(Lab02j.class);
+    private static Logger logger = LoggerFactory.getLogger(Lab02l.class);
 
     // The System.getProperties() value from which various things will be read.
     private Properties properties;
@@ -35,7 +35,7 @@ public class Lab02j {
 
 
 
-    public Lab02j() {
+    public Lab02l() {
 
         logger.info("Running " + this.getClass().getSimpleName());
 
@@ -245,6 +245,6 @@ public class Lab02j {
     
     
     public static void main(String[] args) {
-        new Lab02j();
+        new Lab02l();
     }
 }
