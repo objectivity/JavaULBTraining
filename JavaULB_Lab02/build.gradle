@@ -69,8 +69,8 @@ project (':JavaULB_Lab02') {
 
     // Start shadowJar task before test phase
     test.dependsOn("shadowJar")
-    
-    
+
+
     // Configure the shadow jar task
     shadowJar {
         zip64 true
@@ -111,6 +111,28 @@ task envVars () {
 task cb(type: GradleBuild) {
     tasks = [ 'clean', 'build' ]
 }
+
+/*
+def fileExists(filePath){
+    println("fileExists()...");
+    def file = new File(filePath)
+    if(!file.exists()){
+        return false;
+    }
+}
+
+
+task cleanupFD() {
+    onlyIf {
+        fileExists($bootfile)
+    }
+
+    doLast {
+        println "cleanupFD task ran."
+    }
+
+}
+*/
 
 
 // Create FD
@@ -178,7 +200,7 @@ task run2a() {
 	println("Running 'run2a'")
         println("LIB_DIR = ${LIB_DIR}")
         javaexec{
-            classpath("${LIB_DIR}/JavaULB_${LAB_NAME}-1.0-SNAPSHOT-all.jar",                    
+            classpath("${LIB_DIR}/JavaULB_${LAB_NAME}-1.0-SNAPSHOT-all.jar",
                      "${objyHome}/lib/objydb-core-${objyVersion}.jar")
             jvmArgs = [\
             "-Xmx8G", \
@@ -200,7 +222,7 @@ task run2b() {
 	println("Running 'run2b'")
         println("LIB_DIR = ${LIB_DIR}")
         javaexec{
-            classpath("${LIB_DIR}/JavaULB_${LAB_NAME}-1.0-SNAPSHOT-all.jar",                    
+            classpath("${LIB_DIR}/JavaULB_${LAB_NAME}-1.0-SNAPSHOT-all.jar",
                      "${objyHome}/lib/objydb-core-${objyVersion}.jar")
             jvmArgs = [\
             "-Xmx8G", \
@@ -222,7 +244,7 @@ task run2c() {
 	println("Running 'run2c'")
         println("LIB_DIR = ${LIB_DIR}")
         javaexec{
-            classpath("${LIB_DIR}/JavaULB_${LAB_NAME}-1.0-SNAPSHOT-all.jar",                    
+            classpath("${LIB_DIR}/JavaULB_${LAB_NAME}-1.0-SNAPSHOT-all.jar",
                      "${objyHome}/lib/objydb-core-${objyVersion}.jar")
             jvmArgs = [\
             "-Xmx8G", \
@@ -245,7 +267,7 @@ task run2d() {
 	println("Running 'run2d'")
         println("LIB_DIR = ${LIB_DIR}")
         javaexec{
-            classpath("${LIB_DIR}/JavaULB_${LAB_NAME}-1.0-SNAPSHOT-all.jar",                    
+            classpath("${LIB_DIR}/JavaULB_${LAB_NAME}-1.0-SNAPSHOT-all.jar",
                      "${objyHome}/lib/objydb-core-${objyVersion}.jar")
             jvmArgs = [\
             "-Xmx8G", \
@@ -267,7 +289,7 @@ task run2e() {
 	println("Running 'run2e'")
         println("LIB_DIR = ${LIB_DIR}")
         javaexec{
-            classpath("${LIB_DIR}/JavaULB_${LAB_NAME}-1.0-SNAPSHOT-all.jar",                    
+            classpath("${LIB_DIR}/JavaULB_${LAB_NAME}-1.0-SNAPSHOT-all.jar",
                      "${objyHome}/lib/objydb-core-${objyVersion}.jar")
             jvmArgs = [\
             "-Xmx8G", \
@@ -289,7 +311,7 @@ task run2f() {
 	println("Running 'run2f'")
         println("LIB_DIR = ${LIB_DIR}")
         javaexec{
-            classpath("${LIB_DIR}/JavaULB_${LAB_NAME}-1.0-SNAPSHOT-all.jar",                    
+            classpath("${LIB_DIR}/JavaULB_${LAB_NAME}-1.0-SNAPSHOT-all.jar",
                      "${objyHome}/lib/objydb-core-${objyVersion}.jar")
             jvmArgs = [\
             "-Xmx8G", \
@@ -311,7 +333,7 @@ task run2g() {
 	println("Running 'run2g'")
         println("LIB_DIR = ${LIB_DIR}")
         javaexec{
-            classpath("${LIB_DIR}/JavaULB_${LAB_NAME}-1.0-SNAPSHOT-all.jar",                    
+            classpath("${LIB_DIR}/JavaULB_${LAB_NAME}-1.0-SNAPSHOT-all.jar",
                      "${objyHome}/lib/objydb-core-${objyVersion}.jar")
             jvmArgs = [\
             "-Xmx8G", \
@@ -333,7 +355,7 @@ task run2h() {
 	println("Running 'run2h'")
         println("LIB_DIR = ${LIB_DIR}")
         javaexec{
-            classpath("${LIB_DIR}/JavaULB_${LAB_NAME}-1.0-SNAPSHOT-all.jar",                    
+            classpath("${LIB_DIR}/JavaULB_${LAB_NAME}-1.0-SNAPSHOT-all.jar",
                      "${objyHome}/lib/objydb-core-${objyVersion}.jar")
             jvmArgs = [\
             "-Xmx8G", \
@@ -357,7 +379,7 @@ task run2i() {
         println("LIB_DIR = ${LIB_DIR}")
         println("PROJECT_DIR = ${PROJECT_DIR}")
         javaexec{
-            classpath("${LIB_DIR}/JavaULB_${LAB_NAME}-1.0-SNAPSHOT-all.jar",                    
+            classpath("${LIB_DIR}/JavaULB_${LAB_NAME}-1.0-SNAPSHOT-all.jar",
                      "${objyHome}/lib/objydb-core-${objyVersion}.jar")
             jvmArgs = [\
             "-Xmx8G", \
@@ -382,7 +404,7 @@ task run2j() {
         println("LIB_DIR = ${LIB_DIR}")
         println("PROJECT_DIR = ${PROJECT_DIR}")
         javaexec{
-            classpath("${LIB_DIR}/JavaULB_${LAB_NAME}-1.0-SNAPSHOT-all.jar",                    
+            classpath("${LIB_DIR}/JavaULB_${LAB_NAME}-1.0-SNAPSHOT-all.jar",
                      "${objyHome}/lib/objydb-core-${objyVersion}.jar")
             jvmArgs = [\
             "-Xmx8G", \
@@ -406,7 +428,7 @@ task run2k() {
         println("LIB_DIR = ${LIB_DIR}")
         println("PROJECT_DIR = ${PROJECT_DIR}")
         javaexec{
-            classpath("${LIB_DIR}/JavaULB_${LAB_NAME}-1.0-SNAPSHOT-all.jar",                    
+            classpath("${LIB_DIR}/JavaULB_${LAB_NAME}-1.0-SNAPSHOT-all.jar",
                      "${objyHome}/lib/objydb-core-${objyVersion}.jar")
             jvmArgs = [\
             "-Xmx8G", \
@@ -429,7 +451,7 @@ task run2l() {
         println("LIB_DIR = ${LIB_DIR}")
         println("PROJECT_DIR = ${PROJECT_DIR}")
         javaexec{
-            classpath("${LIB_DIR}/JavaULB_${LAB_NAME}-1.0-SNAPSHOT-all.jar",                    
+            classpath("${LIB_DIR}/JavaULB_${LAB_NAME}-1.0-SNAPSHOT-all.jar",
                      "${objyHome}/lib/objydb-core-${objyVersion}.jar")
             jvmArgs = [\
             "-Xmx8G", \
@@ -452,7 +474,12 @@ def makeDir(dirPath){
     if(!folder.exists()){
         folder.mkdirs()
     }
-}
+}                                                                                                                                                                                                                            
+
+
+
+
+
 
 
 // Note: "common.gradle" in the root project contains additional initialization
