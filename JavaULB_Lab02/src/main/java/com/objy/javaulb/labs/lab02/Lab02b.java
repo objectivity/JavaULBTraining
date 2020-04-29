@@ -110,6 +110,10 @@ public class Lab02b {
                 // Lookup the "Person" class from the schema in the database.
                 com.objy.data.Class cxPerson = com.objy.data.Class.lookupClass("Person");
                 
+                if (cxPerson == null) {
+                    logger.error("There is no schema definition for type 'Person'.");
+                }
+                
                 // Iterate over the attributes in our Person class.
                 // getAttrbutes() returns an Interator<Variable> object.
                 for (Variable v : cxPerson.getAttributes()) {
@@ -134,6 +138,7 @@ public class Lab02b {
 
 	    } catch (Exception ex) {
 		ex.printStackTrace();
+                break;
 	    }
 	}
     }
