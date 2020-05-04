@@ -25,6 +25,8 @@ def PMD_FILE            = PROJECT_DIR+"/data/"+LAB_NAME+".pmd"
 def BOOTFILE_FULLPATH
 def BOOTFILE_DIR
 
+def RMDEL
+
 if (System.getProperty('os.name').toLowerCase(Locale.ROOT).contains('windows')) {
     //---------------------------------------
     // Windows values here...
@@ -32,6 +34,8 @@ if (System.getProperty('os.name').toLowerCase(Locale.ROOT).contains('windows')) 
     BOOTFILE_DIR = "${PROJECT_DIR}/data/dbs"
     BOOTFILE_FULLPATH = "${BOOTFILE_DIR}/${LAB_NAME}.boot"
     PMD_FILE = "${PROJECT_DIR}/config/win/${LAB_NAME}.pmd"
+    RMDEL = "DEL"
+    
 } else {
     //---------------------------------------
     // Non-Windows values here...
@@ -40,6 +44,7 @@ if (System.getProperty('os.name').toLowerCase(Locale.ROOT).contains('windows')) 
     BOOTFILE_DIR = "${PROJECT_DIR}/data/dbs"
     BOOTFILE_FULLPATH = "${BOOTFILE_DIR}/${LAB_NAME}.boot"
     PMD_FILE = PROJECT_DIR+"/config/linux/${LAB_NAME}.pmd"
+    RMDEL = "rm"
 }
 
 
@@ -51,7 +56,8 @@ def fddirhost        = project.hasProperty('fddirhost')         ? project.fddirh
 def fddirpath        = project.hasProperty('fddirpath')         ? project.fddirpath         : "${BOOTFILE_DIR}"
 def jnldirhost       = project.hasProperty('jnldirhost')        ? project.jnldirhost        : InetAddress.getLocalHost().getHostName()
 def jnldirpath       = project.hasProperty('jnldirpath')        ? project.jnldirpath        : "${fddirpath}" + "/jnl"
-def bootfile		 = "${fddirpath}/${fdname}.boot"
+def bootfile         = "${fddirpath}/${fdname}.boot"
+
 // When expressing the full, UNC path the "${fddirhost}::" causes havoc on Windows/DOS.
 
 
@@ -112,27 +118,8 @@ task cb(type: GradleBuild) {
     tasks = [ 'clean', 'build' ]
 }
 
-/*
-def fileExists(filePath){
-    println("fileExists()...");
-    def file = new File(filePath)
-    if(!file.exists()){
-        return false;
-    }
-}
 
 
-task cleanupFD() {
-    onlyIf {
-        fileExists($bootfile)
-    }
-
-    doLast {
-        println "cleanupFD task ran."
-    }
-
-}
-*/
 
 
 // Create FD
@@ -151,7 +138,8 @@ task recreateFD(){
 
         // cleanup fd
         exec {
-            commandLine mycmd,  myflag, "objy cleanupFD -local -bootfile ${bootfile}"
+            commandLine mycmd,  myflag, "objy deleteFD -standalone -bootfile ${bootfile}"
+            //commandLine mycmd,  myflag, "objy cleanupFD -local -bootfile ${bootfile}"
             ignoreExitValue = true
         }
 

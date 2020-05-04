@@ -5,7 +5,6 @@ import com.objy.data.Edge;
 import com.objy.data.schemaProvider.SchemaProvider;
 import com.objy.data.Instance;
 import com.objy.data.LogicalType;
-import com.objy.data.Reference;
 import com.objy.data.Variable;
 import com.objy.data.Walk;
 import com.objy.db.Connection;
@@ -16,10 +15,6 @@ import com.objy.db.TransactionMode;
 import com.objy.db.TransactionScope;
 import com.objy.expression.language.Language;
 import com.objy.expression.language.LanguageRegistry;
-import com.objy.javaulb.utils.addresses.Address;
-import com.objy.javaulb.utils.addresses.AddressFactory;
-import com.objy.javaulb.utils.names.Name;
-import com.objy.javaulb.utils.names.NameFactory;
 import com.objy.statement.Statement;
 import java.io.File;
 import java.util.Iterator;
@@ -53,13 +48,18 @@ public class Lab06a {
         try {
             validateProperties();
 
-
-            SessionLogging.setLoggingOptions(SessionLogging.LogAll, "D:/Root/temp");
+            SessionLogging.setLoggingOptions(SessionLogging.LogAll, properties.getProperty("SESSION_LOG_DIR"));
 
             openConnection(bootFile);
 
             try {
                 createSchema();
+
+                addEntries();
+
+                readEntries();
+
+
             }catch(Exception ex) {
                 ex.printStackTrace();
                 return;
@@ -134,7 +134,7 @@ public class Lab06a {
 
                     String doQuery
                             = "UPDATE SCHEMA {\n"
-                            + "    CREATE CLASS KPPair {\n"
+                            + "    CREATE CLASS KVPair {\n"
                             + "         Key : String,\n"
                             + "         Value : String\n"
                             + "     }\n"
@@ -188,13 +188,37 @@ public class Lab06a {
 
 
 
+    /**
+     * A simple key-value class.
+     */
+    class KVData {
+        public String key;
+        public String value;
 
-    private String createData(int count) throws Exception {
+        public KVData(String k, String v) {
+            this.key = k;
+            this.value = v;
+        }
+    }
 
-        String oid = null;
-        
-        NameFactory nameFactory = new NameFactory();
-        AddressFactory addressFactory = new AddressFactory();
+
+
+
+
+    /**
+     * This method creates an instance of MyType which contains a com.objy.data.Map
+     * attribute and then puts some things in the map.
+     */
+    private void addEntries() {
+
+        logger.info("addEntries() - Begin...");
+
+        KVData[] kvData = {
+            new KVData("AKey", "AValue"),
+            new KVData("BKey", "BValue"),
+            new KVData("CKey", "CValue"),
+            new KVData("DKey", "DValue")
+        };
 
         int transLCERetryCount = 0;
         boolean transactionSuccessful = false;
@@ -205,82 +229,46 @@ public class Lab06a {
                 // Ensure that our view of the schema is up to date.
                 SchemaProvider.getDefaultPersistentProvider().refresh(true);
 
-                // Lookup the Person class from the schema in the ThingSpan federation.
-                com.objy.data.Class cPerson = com.objy.data.Class.lookupClass("Person");
+                // Create an instance of MyType
+                com.objy.data.Class cMyType = com.objy.data.Class.lookupClass("MyType");
+                Instance iMT = Instance.createPersistent(cMyType);
 
-                com.objy.data.Class cAddress = com.objy.data.Class.lookupClass("Address");
-                com.objy.data.Class cLivesEdge = com.objy.data.Class.lookupClass("LivesEdge");
+                // Get the Map attribute from the instance.
+                com.objy.data.Map map = iMT.getAttributeValue("MyMap").mapValue();
 
+                
+                com.objy.data.Class cKVPair = com.objy.data.Class.lookupClass("KVPair");
 
-                for (int i = 0; i < 1000; i++) {
-                    Name name = nameFactory.createName();
+                for (KVData kvd : kvData) {
+                    // Create the target KVPair object.
+                    Instance iKV = Instance.createPersistent(cKVPair);
 
-                    //logger.info("Name: " + name.first + " " + name.middle + " " + name.last);
+                    // Set the attributes on the new KVPair object.
+                    iKV.getAttributeValue("Key").set(kvd.key);
+                    iKV.getAttributeValue("Value").set(kvd.value);
 
-                    // Using the cPerson Class object, create a Person Instance.
-                    Instance iPerson = Instance.createPersistent(cPerson);
+                    // We need a Variable to represent key String value.
+                    Variable vKey = new Variable(kvd.key);
+                    
+                    // We need an empty Variable that will hold the Reference
+                    // to the iKV object.
+                    Variable vValue = new Variable();
 
-                    //logger.info("iPerson OID: " + iPerson.getObjectId().toString());
+                    // Wrap iKV in a Reference and put that into vValue.
+                    vValue.set(new com.objy.data.Reference(iKV));
 
-                    // We access the value of each attribute in the Instance using
-                    // a variable that we 'associate' with each attribute.
-                    Variable vFirstName = iPerson.getAttributeValue("FirstName");
-                    vFirstName.set(name.first);
-
-                    Variable vMiddleInitial = iPerson.getAttributeValue("MiddleName");
-                    vMiddleInitial.set(name.middle);
-
-                    Variable vLastName = iPerson.getAttributeValue("LastName");
-                    vLastName.set(name.last);
-
-
-                    Address address = addressFactory.getAddress();
-                    Instance iAddress = Instance.createPersistent(cAddress);
-
-                    Variable vStreet1 = iAddress.getAttributeValue("Street1");
-                    vStreet1.set(address.number + " " + address.street);
-
-                    Variable vCity = iAddress.getAttributeValue("City");
-                    vCity.set(address.city);
-
-                    Variable vState = iAddress.getAttributeValue("State");
-                    vState.set(address.state);
-
-                    Variable vZIP = iAddress.getAttributeValue("ZIP");
-                    vZIP.set(address.zip);
-
-                    Variable vLat = iAddress.getAttributeValue("Latitude");
-                    vLat.set(address.latitude);
-
-                    Variable vLon = iAddress.getAttributeValue("Longitude");
-                    vLon.set(address.longitude);
-
-                    // Remember, we only have to set one end of the relationship.
-                    // The other end it set automatically based on the schema
-                    // definition.
-                    Variable vLivesHere = iAddress.getAttributeValue("LivesHere");
-                    com.objy.data.List livesHereList = vLivesHere.listValue();
-
-                    Instance iLivesEdge = Instance.createPersistent(cLivesEdge);
-                    Variable vLEPerson = iLivesEdge.getAttributeValue("ToPerson");
-                    vLEPerson.set(new Reference(iPerson));
-
-                    Variable vLEAddress = iLivesEdge.getAttributeValue("ToAddress");
-                    vLEAddress.set(new Reference(iAddress));
-
-
-
-                    if ((i%100) == 0) {
-                        logger.info("Persons created: " + i);
-                    }
+                    // Put the vKey and vValue into the map.
+                    map.put(vKey, vValue);
                 }
 
-                // The complete writes the data out to the database.
-                tx.complete();
+                logger.info("Calling tx.complete()...");
 
+
+                // Complete and close the transaction
+                tx.complete();
                 tx.close();
 
-                //logger.info("Person class created in federation.");
+                logger.info("Back from tx.close()");
 
                 transactionSuccessful = true;
 
@@ -292,13 +280,113 @@ public class Lab06a {
                 }
 
             } catch (Exception ex) {
+                logger.error("Error: ", ex);
                 ex.printStackTrace();
-                break;
+                throw ex;
             }
         }
 
-        return oid;
+        logger.info("addEntries() - End...");
     }
+
+
+
+    private void readEntries() {
+
+        logger.info("readEntries() - Begin...");
+
+        int transLCERetryCount = 0;
+        boolean transactionSuccessful = false;
+        while (!transactionSuccessful) {
+            // Create a new TransactionScope that is READ_UPDATE.
+            try (TransactionScope tx = new TransactionScope(TransactionMode.READ_UPDATE)) {
+
+                // Ensure that our view of the schema is up to date.
+                SchemaProvider.getDefaultPersistentProvider().refresh(true);
+
+                Language doLang = LanguageRegistry.lookupLanguage("DO");
+                Statement statement;
+
+                try {
+                    String doQuery = "FROM MyType return *";
+
+                    logger.info("doQuery: <" + doQuery + ">");
+                    statement = new Statement(doLang, doQuery);
+
+                    Iterator<Variable> it = statement.execute().sequenceValue().iterator();
+
+                    // Loop over the MyType objects in the results.
+                    while (it.hasNext()) {
+
+                        Variable v = it.next();
+
+                        Instance iMT = v.instanceValue();
+                        
+                        logger.info("MyType OID = " + iMT.getObjectId().toString());
+
+                        // Get the MyMap attribute from the current MyType object.
+                        Variable vMTMyMap = iMT.getAttributeValue("MyMap");
+
+                        // Convert the Variable to Map.
+                        com.objy.data.Map map = vMTMyMap.mapValue();
+
+                        // Iteratr over the keys in the map.
+                        Iterator<Variable> itKeys = map.keys().iterator();
+                        while (itKeys.hasNext()) {
+                            Variable vKey = itKeys.next();
+
+                            // Get the String value for the current key.
+                            String sKey = vKey.stringValue();
+
+                            // Within the map, the value is a Reference.
+                            // Get the referenced object which is of type KVPair.
+                            Instance iValue = map.get(vKey).referenceValue().getReferencedObject();
+
+                            // Get the Value attribute from the KVPair object.
+                            String sValue = iValue.getAttributeValue("Value").stringValue();
+
+                            logger.info("MyType.MyMap: sKey <" + sKey + ">   sValue <" + sValue + ">");
+                        }
+                    }
+                } catch(Exception ex) {
+                    ex.printStackTrace();
+                    break;
+                }
+
+
+
+                logger.info("Calling tx.complete()...");
+
+
+                // Complete and close the transaction
+                tx.complete();
+                tx.close();
+
+                logger.info("Back from tx.close()");
+
+                transactionSuccessful = true;
+
+            } catch (LockConflictException lce) {
+                logger.info("LockConflictException. Attempting retry...  retryCount = " + ++transLCERetryCount);
+                try {
+                    Thread.sleep(10 * transLCERetryCount);
+                } catch (InterruptedException ie) {
+                }
+
+            } catch (Exception ex) {
+                logger.error("Error: ", ex);
+                ex.printStackTrace();
+                throw ex;
+            }
+        }
+
+        logger.info("readEntries() - End...");
+
+
+
+
+    }
+
 
 
     private void matchQuery(String doQuery) {
