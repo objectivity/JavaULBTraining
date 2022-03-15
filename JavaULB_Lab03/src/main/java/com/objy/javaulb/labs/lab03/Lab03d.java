@@ -150,7 +150,7 @@ public class Lab03d {
                 // Using the cPerson Class object, create a Person Instance.
                 Instance iPerson = Instance.createPersistent(cPerson);
 
-                logger.info("iPerson OID: " + iPerson.getObjectId().toString());
+                logger.info("iPerson OID: " + iPerson.getIdentifier().toString());
 
                 // We access the value of each attribute in the Instance using
                 // a variable that we 'associate' with each attribute.

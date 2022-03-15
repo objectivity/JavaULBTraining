@@ -110,11 +110,11 @@ public class Lab03g {
                     vKnowsEntry = knowsList.get(i);
                     Reference rPersonToCheck = vKnowsEntry.referenceValue();
                     
-                    logger.info("Evaluating " + rPersonToCheck.getObjectId().toString());
+                    logger.info("Evaluating " + rPersonToCheck.getIdentifier().toString());
                                       
                     // Check to see if the referenced objects are the same by OID.
-                    if (rPersonToCheck.getObjectId().toString().equals(rPersonTo.getObjectId().toString())) {
-                        logger.info("Removing " + rPersonToCheck.getObjectId().toString() + " from " + fromOID);
+                    if (rPersonToCheck.getIdentifier().toString().equals(rPersonTo.getIdentifier().toString())) {
+                        logger.info("Removing " + rPersonToCheck.getIdentifier().toString() + " from " + fromOID);
                         knowsList.remove(i);
                         found = true;
                         break;
@@ -228,9 +228,9 @@ public class Lab03g {
                 Instance iPerson = Instance.createPersistent(cPerson);
 
                 // Get and retain the OID of the Instance object we just created.
-                personOID = iPerson.getObjectId().toString();
+                personOID = iPerson.getIdentifier().toString();
 
-                logger.info("iPerson OID: " + iPerson.getObjectId().toString());
+                logger.info("iPerson OID: " + iPerson.getIdentifier().toString());
 
                 // We access the value of each attribute in the Instance using
                 // a variable that we 'associate' with each attribute.

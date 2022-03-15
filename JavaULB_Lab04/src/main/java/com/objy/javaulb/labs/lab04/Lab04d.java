@@ -12,8 +12,6 @@ import com.objy.db.Connection;
 import com.objy.db.LockConflictException;
 import com.objy.db.TransactionMode;
 import com.objy.db.TransactionScope;
-import com.objy.expression.language.Language;
-import com.objy.expression.language.LanguageRegistry;
 import com.objy.javaulb.utils.addresses.Address;
 import com.objy.javaulb.utils.addresses.AddressFactory;
 import com.objy.javaulb.utils.names.Name;
@@ -276,7 +274,7 @@ public class Lab04d {
                     // Using the cPerson Class object, create a Person Instance.
                     Instance iPerson = Instance.createPersistent(cPerson);
 
-                    //logger.info("iPerson OID: " + iPerson.getObjectId().toString());
+                    //logger.info("iPerson OID: " + iPerson.getIdentifier().toString());
 
                     // We access the value of each attribute in the Instance using
                     // a variable that we 'associate' with each attribute.
@@ -370,12 +368,9 @@ public class Lab04d {
                 // Ensure that our view of the schema is up to date.
                 SchemaProvider.getDefaultPersistentProvider().refresh(true);
 
-
-                Language doLang = LanguageRegistry.lookupLanguage("DO");
-
                 Variable vStatementExecute;
 
-                Statement statement = new Statement(doLang, doQuery);
+                Statement statement = new Statement("DO", doQuery);
 
                 vStatementExecute = statement.execute();
 
@@ -446,14 +441,14 @@ public class Lab04d {
             Attribute at = cx.getAttribute(i);
             Variable v = ix.getAttributeValue(at.getName());
 
-            LogicalType lt = at.getAttributeValueSpecification().getFacet().getLogicalType();
+            LogicalType lt = at.getAttributeValueSpecification().getLogicalType();
 
             switch (lt) {
                 case STRING:
                     sb.append(String.format("%-15s    ", v.stringValue()));
                     break;
                 case REFERENCE:
-                    sb.append(String.format("%-15s    ", v.referenceValue().getObjectId().toString()));
+                    sb.append(String.format("%-15s    ", v.referenceValue().getIdentifier().toString()));
                     break;
                 default:
                     sb.append(String.format("%-15s    ", "Not Handled"));
@@ -475,7 +470,7 @@ public class Lab04d {
             Attribute at = cx.getAttribute(i);
             Variable v = ix.getAttributeValue(at.getName());
 
-            LogicalType lt = at.getAttributeValueSpecification().getFacet().getLogicalType();
+            LogicalType lt = at.getAttributeValueSpecification().getLogicalType();
 
             sb.append(String.format("%-15s    ", at.getName()));
             sbSeparator.append("---------------    ");
@@ -488,7 +483,7 @@ public class Lab04d {
             Attribute at = cx.getAttribute(i);
             Variable v = ix.getAttributeValue(at.getName());
 
-            LogicalType lt = at.getAttributeValueSpecification().getFacet().getLogicalType();
+            LogicalType lt = at.getAttributeValueSpecification().getLogicalType();
             
             sb.append(String.format("%-15s    ", lt.toString()));
         }

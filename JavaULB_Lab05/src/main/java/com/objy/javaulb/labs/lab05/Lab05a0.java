@@ -15,14 +15,13 @@ import com.objy.db.LockConflictException;
 import com.objy.db.SessionLogging;
 import com.objy.db.TransactionMode;
 import com.objy.db.TransactionScope;
-import com.objy.expression.language.Language;
-import com.objy.expression.language.LanguageRegistry;
 import com.objy.javaulb.utils.addresses.Address;
 import com.objy.javaulb.utils.addresses.AddressFactory;
 import com.objy.javaulb.utils.names.Name;
 import com.objy.javaulb.utils.names.NameFactory;
 import com.objy.statement.Statement;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Properties;
 import org.slf4j.Logger;
@@ -50,6 +49,9 @@ public class Lab05a0 {
     private NameFactory nameFactory;
     private AddressFactory addressFactory;
 
+    private ArrayList<String> lastnameList = new ArrayList<>();
+
+
     public Lab05a0() {
 
         logger.info("Running " + this.getClass().getSimpleName());
@@ -76,13 +78,16 @@ public class Lab05a0 {
             int count = 1;
             createData(count);
 
-            String doQuery1 = "MATCH p = (:Person {LastName =~ '^Ne.*'}) "
+            int index = (int)(Math.random() * lastnameList.size());
+            String lastNamePrefix = lastnameList.get(index).substring(0,2);
+
+            String doQuery1 = "MATCH p = (:Person {LastName =~ '^" + lastNamePrefix + ".*'}) "
                     + "-->(:Address) RETURN *";
 
             matchQuery(doQuery1);
             
             
-            String doQuery2 = "MATCH p = (:Person {LastName =~ '^Ne.*'}) "
+            String doQuery2 = "MATCH p = (:Person {LastName =~ '^" + lastNamePrefix + ".*'}) "
                     + "-->(:Address)-->(:Person) RETURN *";
 
             matchQuery(doQuery2);
@@ -330,12 +335,14 @@ public class Lab05a0 {
                 for (int i = 0; i < count; i++) {
                     Name name = nameFactory.createName();
 
+                    lastnameList.add(name.getLastName());
+
                     //logger.info("Name: " + name.first + " " + name.middle + " " + name.last);
 
                     // Using the cPerson Class object, create a Person Instance.
                     Instance iPerson = Instance.createPersistent(cPerson);
 
-                    //logger.info("iPerson OID: " + iPerson.getObjectId().toString());
+                    //logger.info("iPerson OID: " + iPerson.getIdentifier().toString());
 
                     // We access the value of each attribute in the Instance using
                     // a variable that we 'associate' with each attribute.
@@ -435,11 +442,9 @@ public class Lab05a0 {
                 // Ensure that our view of the schema is up to date.
                 SchemaProvider.getDefaultPersistentProvider().refresh(true);
 
-                Language doLang = LanguageRegistry.lookupLanguage("DO");
-
                 Variable vStatementExecute;
 
-                Statement statement = new Statement(doLang, doQuery);
+                Statement statement = new Statement("DO", doQuery);
 
                 vStatementExecute = statement.execute();
 
@@ -503,26 +508,31 @@ public class Lab05a0 {
 
         StringBuilder sb = new StringBuilder();
 
-        if (ix.getObjectId() != null) {
-            sb.append(String.format("        %-15s:    %-15s\n", "OID", ix.getObjectId().toString()));
+        if (ix.getIdentifier() != null) {
+            sb.append(String.format("        %-15s:    %-15s\n", "OID", ix.getIdentifier().toString()));
             sb.append(String.format("        %-15s:    %-15s\n", "Classname", ix.getClass(true).getName()));
             sb.append("        - - - - - - - - - - - - - - - - - - - - - - - - - - -\n");
         }
         for (int i = 0; i < cx.getNumberOfAttributes(); i++) {
             Attribute at = cx.getAttribute(i);
             Variable v = ix.getAttributeValue(at.getName());
+//            logger.info("at.getName() = " + at.getName());
 
-            LogicalType lt = at.getAttributeValueSpecification().getFacet().getLogicalType();
+            LogicalType lt = at.getAttributeValueSpecification().getLogicalType();
+//            LogicalType lt = at.getAttributeValueSpecification().getFacet().getLogicalType();
 
             switch (lt) {
                 case STRING:
                     sb.append(String.format("        %-15s:    %-15s    \n", at.getName(), v.stringValue()));
                     break;
+                case REAL:
+                    sb.append(String.format("        %-15s:    %-15.3f    \n", at.getName(), v.floatValue()));
+                    break;
                 case REFERENCE:
-                    sb.append(String.format("        %-15s:    %-15s    \n",  at.getName(), v.referenceValue().getObjectId().toString()));
+                    sb.append(String.format("        %-15s:    %-15s    \n",  at.getName(), v.referenceValue().getIdentifier().toString()));
                     break;
                 case INSTANCE:
-                    sb.append(String.format("        %-15s:    %-15s    \n",  at.getName(), v.instanceValue().getObjectId().toString()));
+                    sb.append(String.format("        %-15s:    %-15s    \n",  at.getName(), v.instanceValue().getIdentifier().toString()));
                     break;
                 case WALK:
                     sb.append("==============================================\n");
@@ -565,8 +575,8 @@ public class Lab05a0 {
             displayInstance(iTo);
 
 //            logger.info("Got Edge: "
-//                    + " FROM: " + edge.from().getObjectId().toString()
-//                    + "  TO: " + edge.to().getObjectId().toString());
+//                    + " FROM: " + edge.from().getIdentifier().toString()
+//                    + "  TO: " + edge.to().getIdentifier().toString());
 
         }
     }
@@ -582,7 +592,7 @@ public class Lab05a0 {
             Attribute at = cx.getAttribute(i);
             Variable v = ix.getAttributeValue(at.getName());
 
-            LogicalType lt = at.getAttributeValueSpecification().getFacet().getLogicalType();
+            LogicalType lt = at.getAttributeValueSpecification().getLogicalType();
 
             sb.append(String.format("%-15s    ", at.getName()));
             sbSeparator.append("---------------    ");
@@ -595,7 +605,7 @@ public class Lab05a0 {
             Attribute at = cx.getAttribute(i);
             Variable v = ix.getAttributeValue(at.getName());
 
-            LogicalType lt = at.getAttributeValueSpecification().getFacet().getLogicalType();
+            LogicalType lt = at.getAttributeValueSpecification().getLogicalType();
 
             sb.append(String.format("%-15s    ", lt.toString()));
         }

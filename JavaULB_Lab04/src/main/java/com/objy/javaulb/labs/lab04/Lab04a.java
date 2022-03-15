@@ -164,9 +164,9 @@ public class Lab04a {
                 // Using the cPerson Class object, create a Person Instance.
                 Instance iPerson = Instance.createPersistent(cPerson);
 
-                oid = iPerson.getObjectId().toString();
+                oid = iPerson.getIdentifier().toString();
 
-                logger.info("iPerson OID: " + iPerson.getObjectId().toString());
+                logger.info("iPerson OID: " + iPerson.getIdentifier().toString());
 
                 // We access the value of each attribute in the Instance using
                 // a variable that we 'associate' with each attribute.
@@ -218,7 +218,7 @@ public class Lab04a {
                 // Using the cPerson Class object, create a Person Instance.
                 Instance iPerson = Instance.lookup(ObjectId.fromString(oid));
 
-                logger.info("iPerson OID: " + iPerson.getObjectId().toString());
+                logger.info("iPerson OID: " + iPerson.getIdentifier().toString());
 
                 // We access the value of each attribute in the Instance using
                 // a variable that we 'associate' with each attribute.

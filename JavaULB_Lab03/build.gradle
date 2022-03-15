@@ -1,14 +1,45 @@
 
 
-
 def LAB_NAME = "Lab03"
 
-def version = "0.1"
 
 
-// Java source settings
-sourceCompatibility = '1.8'
-sourceSets.main.java.srcDirs = ['src/main/java']
+// Maven stuff...
+description = 'JavaULB_Lab03'
+group = "com.objy.javaulb.labs.lab03"
+version = '1.0.0'
+
+
+
+
+//-----------------------------------------------------
+// Set version values here...
+//-----------------------------------------------------
+ext.igVersion       = rootProject.igVersion
+ext.objyVersion     = rootProject.objyVersion
+ext.objyinstalldir  = rootProject.objyinstalldir
+ext.objyHome        = rootProject.objyHome
+
+
+
+//-----------------------------------------------------
+// Set version values here...
+//-----------------------------------------------------
+ext.igVersion	= project.hasProperty('igVersion')	? igVersion 	:  '2021.1'
+ext.objyVersion = project.hasProperty('objyVersion')	? objyVersion   :  '13.6.0' 	// default
+
+ext.objyinstalldir  =   isWindows ? 'C:\\Program Files' :  '/opt'
+ext.objyHome  = project.hasProperty('objyHome')    ? project.objyHome   : objyinstalldir + File.separator + 'Thingspan' + File.separator + igVersion
+//ext.objyHome  = project.hasProperty('objyHome')    ? project.objyHome   : objyinstalldir + File.separator + 'InfiniteGraph' + File.separator + igVersion
+
+
+//println "igVersion Version     = ${igVersion}"
+//println "objyVersion Version   = ${objyVersion}"
+//println("objyHome              = $objyHome")
+//println("objyVersion           = $objyVersion")
+//println("ext.objyVersion       = $ext.objyVersion")
+
+
 
 
 
@@ -75,36 +106,24 @@ task envVars () {
 
 
 
-project (':JavaULB_Lab03') {
-    dependencies {
-        compile project(path: ':JavaULB_Utils', configuration: 'shadow')
-        
-        // Third party dependency
-        compile files("$objyHome/lib/objydb-core-${objyVersion}.jar")
 
-        compile 'org.slf4j:slf4j-api:1.8.0-beta1'
-        compile 'org.slf4j:slf4j-log4j12:1.8.0-beta1'
-        compile 'log4j:log4j:1.2.17'
-    }
 
-    // Start shadowJar task before test phase
-    test.dependsOn("shadowJar")
+dependencies {
+    implementation project(path: ':JavaULB_Utils', configuration: 'shadow')
     
-    
-    // Configure the shadow jar task
-    shadowJar {
-        zip64 true
-        dependencies {
-            include(dependency(':JavaULB_Utils'))
-            
-            include(dependency('com.objy.objydb:objydb-core:.*'))
-
-            include(dependency('org.slf4j:slf4j-api:1.8.0-beta1'))
-            include(dependency('org.slf4j:slf4j-log4j12:1.8.0-beta1'))
-            include(dependency('log4j:log4j:1.2.17'))
-        }
-    }
+    implementation files(objydbCoreJar)
+    implementation 'org.slf4j:slf4j-api:1.8.0-beta1'
+    implementation 'org.slf4j:slf4j-log4j12:1.8.0-beta1'
+    implementation 'log4j:log4j:1.2.17'
 }
+
+assemble.dependsOn("shadowJar")
+
+shadowJar {
+    configurations = [project.configurations.compileClasspath]
+    zip64 true
+}
+
 
 
 
@@ -172,20 +191,22 @@ task loadSchema () {
 //    }
 //}
 
-task run3a() {
+
+def appClassPath = "${LIB_DIR}/JavaULB_${LAB_NAME}-1.0.0-all.jar"
+
+task run03a() {
 
     doLast{
-	println("Running 'run3a'")
+	println("Running 'run03a'")
         println("LIB_DIR = ${LIB_DIR}")
         javaexec{
-            classpath("${LIB_DIR}/JavaULB_${LAB_NAME}-1.0-SNAPSHOT-all.jar",                    
-                     "${objyHome}/lib/objydb-core-${objyVersion}.jar")
+            classpath = files("${appClassPath}")
             jvmArgs = [\
             "-Xmx8G", \
             "-DBOOT_FILE=${bootfile}", \
             "-Dlog4j.configuration=file:${PROJECT_DIR}/properties/log4j.properties"
             ]
-            main = "com.objy.javaulb.labs.lab03.Lab03a"
+            mainClass = "com.objy.javaulb.labs.lab03.Lab03a"
             standardInput = System.in
             if (project.hasProperty('args')) {
                     args(args.split(','))
@@ -195,20 +216,19 @@ task run3a() {
 }
 
 
-task run3b() {
+task run03b() {
 
     doLast{
-	println("Running 'run3b'")
+	println("Running 'run03b'")
         println("LIB_DIR = ${LIB_DIR}")
         javaexec{
-            classpath("${LIB_DIR}/JavaULB_${LAB_NAME}-1.0-SNAPSHOT-all.jar",                    
-                     "${objyHome}/lib/objydb-core-${objyVersion}.jar")
+            classpath = files("${appClassPath}")
             jvmArgs = [\
             "-Xmx8G", \
             "-DBOOT_FILE=${bootfile}", \
             "-Dlog4j.configuration=file:${PROJECT_DIR}/properties/log4j.properties"
             ]
-            main = "com.objy.javaulb.labs.lab03.Lab03b"
+            mainClass = "com.objy.javaulb.labs.lab03.Lab03b"
             standardInput = System.in
             if (project.hasProperty('args')) {
                     args(args.split(','))
@@ -218,20 +238,19 @@ task run3b() {
 }
 
 
-task run3c() {
+task run03c() {
 
     doLast{
-	println("Running 'run3c'")
+	println("Running 'run03c'")
         println("LIB_DIR = ${LIB_DIR}")
         javaexec{
-            classpath("${LIB_DIR}/JavaULB_${LAB_NAME}-1.0-SNAPSHOT-all.jar",                    
-                     "${objyHome}/lib/objydb-core-${objyVersion}.jar")
+            classpath = files("${appClassPath}")
             jvmArgs = [\
             "-Xmx8G", \
             "-DBOOT_FILE=${bootfile}", \
             "-Dlog4j.configuration=file:${PROJECT_DIR}/properties/log4j.properties"
             ]
-            main = "com.objy.javaulb.labs.lab03.Lab03c"
+            mainClass = "com.objy.javaulb.labs.lab03.Lab03c"
             standardInput = System.in
             if (project.hasProperty('args')) {
                     args(args.split(','))
@@ -241,20 +260,19 @@ task run3c() {
 }
 
 
-task run3d() {
+task run03d() {
 
     doLast{
-	println("Running 'run3d'")
+	println("Running 'run03d'")
         println("LIB_DIR = ${LIB_DIR}")
         javaexec{
-            classpath("${LIB_DIR}/JavaULB_${LAB_NAME}-1.0-SNAPSHOT-all.jar",                    
-                     "${objyHome}/lib/objydb-core-${objyVersion}.jar")
+            classpath = files("${appClassPath}")
             jvmArgs = [\
             "-Xmx8G", \
             "-DBOOT_FILE=${bootfile}", \
             "-Dlog4j.configuration=file:${PROJECT_DIR}/properties/log4j.properties"
             ]
-            main = "com.objy.javaulb.labs.lab03.Lab03d"
+            mainClass = "com.objy.javaulb.labs.lab03.Lab03d"
             standardInput = System.in
             if (project.hasProperty('args')) {
                     args(args.split(','))
@@ -264,20 +282,19 @@ task run3d() {
 }
 
 
-task run3e() {
+task run03e() {
 
     doLast{
-	println("Running 'run3e'")
+	println("Running 'run03e'")
         println("LIB_DIR = ${LIB_DIR}")
         javaexec{
-            classpath("${LIB_DIR}/JavaULB_${LAB_NAME}-1.0-SNAPSHOT-all.jar",                    
-                     "${objyHome}/lib/objydb-core-${objyVersion}.jar")
+            classpath = files("${appClassPath}")
             jvmArgs = [\
             "-Xmx8G", \
             "-DBOOT_FILE=${bootfile}", \
             "-Dlog4j.configuration=file:${PROJECT_DIR}/properties/log4j.properties"
             ]
-            main = "com.objy.javaulb.labs.lab03.Lab03e"
+            mainClass = "com.objy.javaulb.labs.lab03.Lab03e"
             standardInput = System.in
             if (project.hasProperty('args')) {
                     args(args.split(','))
@@ -287,20 +304,19 @@ task run3e() {
 }
 
 
-task run3f() {
+task run03f() {
 
     doLast{
-	println("Running 'run3f'")
+	println("Running 'run03f'")
         println("LIB_DIR = ${LIB_DIR}")
         javaexec{
-            classpath("${LIB_DIR}/JavaULB_${LAB_NAME}-1.0-SNAPSHOT-all.jar",                    
-                     "${objyHome}/lib/objydb-core-${objyVersion}.jar")
+            classpath = files("${appClassPath}")
             jvmArgs = [\
             "-Xmx8G", \
             "-DBOOT_FILE=${bootfile}", \
             "-Dlog4j.configuration=file:${PROJECT_DIR}/properties/log4j.properties"
             ]
-            main = "com.objy.javaulb.labs.lab03.Lab03f"
+            mainClass = "com.objy.javaulb.labs.lab03.Lab03f"
             standardInput = System.in
             if (project.hasProperty('args')) {
                     args(args.split(','))
@@ -310,20 +326,19 @@ task run3f() {
 }
 
 
-task run3g() {
+task run03g() {
 
     doLast{
-	println("Running 'run3g'")
+	println("Running 'run03g'")
         println("LIB_DIR = ${LIB_DIR}")
         javaexec{
-            classpath("${LIB_DIR}/JavaULB_${LAB_NAME}-1.0-SNAPSHOT-all.jar",                    
-                     "${objyHome}/lib/objydb-core-${objyVersion}.jar")
+            classpath = files("${appClassPath}")
             jvmArgs = [\
             "-Xmx8G", \
             "-DBOOT_FILE=${bootfile}", \
             "-Dlog4j.configuration=file:${PROJECT_DIR}/properties/log4j.properties"
             ]
-            main = "com.objy.javaulb.labs.lab03.Lab03g"
+            mainClass = "com.objy.javaulb.labs.lab03.Lab03g"
             standardInput = System.in
             if (project.hasProperty('args')) {
                     args(args.split(','))
@@ -334,20 +349,19 @@ task run3g() {
 
 
 
-task run3h() {
+task run03h() {
 
     doLast{
-	println("Running 'run3h'")
+	println("Running 'run03h'")
         println("LIB_DIR = ${LIB_DIR}")
         javaexec{
-            classpath("${LIB_DIR}/JavaULB_${LAB_NAME}-1.0-SNAPSHOT-all.jar",                    
-                     "${objyHome}/lib/objydb-core-${objyVersion}.jar")
+            classpath = files("${appClassPath}")
             jvmArgs = [\
             "-Xmx8G", \
             "-DBOOT_FILE=${bootfile}", \
             "-Dlog4j.configuration=file:${PROJECT_DIR}/properties/log4j.properties"
             ]
-            main = "com.objy.javaulb.labs.lab03.Lab03h"
+            mainClass = "com.objy.javaulb.labs.lab03.Lab03h"
             standardInput = System.in
             if (project.hasProperty('args')) {
                     args(args.split(','))
@@ -357,23 +371,22 @@ task run3h() {
 }
 
 
-task run3i() {
+task run03i() {
 
     doLast{
-	println("Running 'run3i'")
+	println("Running 'run03i'")
         println("LIB_DIR = ${LIB_DIR}")
         javaexec{
-            classpath("${LIB_DIR}/JavaULB_${LAB_NAME}-1.0-SNAPSHOT-all.jar",                    
-                     "${objyHome}/lib/objydb-core-${objyVersion}.jar")
+            classpath = files("${appClassPath}")
             jvmArgs = [\
             "-Xmx8G", \
             "-DBOOT_FILE=${bootfile}", \
             "-Dlog4j.configuration=file:${PROJECT_DIR}/properties/log4j.properties", \
             "-DAppConfig=${ROOT_PROJECT_DIR}/config/AppConfig.properties", \
             "-DDataDir=${GENDATA_DIR}", \
-                
+
             ]
-            main = "com.objy.javaulb.labs.lab03.Lab03i"
+            mainClass = "com.objy.javaulb.labs.lab03.Lab03i"
             standardInput = System.in
             if (project.hasProperty('args')) {
                     args(args.split(','))
@@ -400,7 +413,7 @@ def makeDir(dirPath){
 
 
 
- 
+
 // Note: "common.gradle" in the root project contains additional initialization
 //   for this project. This initialization is applied in the "build.gradle"
 //   of the root project.

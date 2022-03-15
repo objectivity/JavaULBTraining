@@ -120,11 +120,11 @@ public class Lab02g {
                 //--------------------------------------------------------------
                 // Use ClassBuilder to create the schema definition.
                 com.objy.data.ClassBuilder cBuilderAddress = new com.objy.data.ClassBuilder("Address");
-                cBuilderAddress.addAttribute(LogicalType.STRING, "Street1");
-                cBuilderAddress.addAttribute(LogicalType.STRING, "Street2");
-                cBuilderAddress.addAttribute(LogicalType.STRING, "City");
-                cBuilderAddress.addAttribute(LogicalType.STRING, "State");
-                cBuilderAddress.addAttribute(LogicalType.STRING, "ZIP");
+                cBuilderAddress.addAttribute("Street1", LogicalType.STRING);
+                cBuilderAddress.addAttribute("Street2", LogicalType.STRING);
+                cBuilderAddress.addAttribute("City", LogicalType.STRING);
+                cBuilderAddress.addAttribute("State", LogicalType.STRING);
+                cBuilderAddress.addAttribute("ZIP", LogicalType.STRING);
                 
                 cBuilderAddress.addAttribute("LivesHere", 
                             new ListSpecificationBuilder()
@@ -141,14 +141,15 @@ public class Lab02g {
                 // Represent the new class into the federated database.
                 SchemaProvider.getDefaultPersistentProvider().represent(cAddress);
                 
+                logger.info("Address class created in schema.");
                 
 
                 // Use ClassBuilder to create the schema definition.
                 com.objy.data.ClassBuilder cBuilderPerson = new com.objy.data.ClassBuilder("Person");
-                cBuilderPerson.addAttribute(LogicalType.STRING, "FirstName");
-                cBuilderPerson.addAttribute(LogicalType.STRING, "LastName");
-                cBuilderPerson.addAttribute(LogicalType.STRING, "MiddleInitial");
-                cBuilderPerson.addAttribute(LogicalType.DATE, "Birthdate"); 
+                cBuilderPerson.addAttribute("FirstName", LogicalType.STRING);
+                cBuilderPerson.addAttribute("LastName", LogicalType.STRING);
+                cBuilderPerson.addAttribute("MiddleInitial", LogicalType.STRING);
+                cBuilderPerson.addAttribute("Birthdate", LogicalType.DATE); 
                 
                 cBuilderPerson.addAttribute("LivesAt", 
                             new ReferenceSpecificationBuilder()

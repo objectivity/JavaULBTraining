@@ -3,37 +3,45 @@ import org.gradle.api.artifacts.*
 plugins {
     id 'java'
     id 'base'
-    id "com.github.johnrengelman.shadow" version "4.0.2"	// supports only gradle 4.0+ and Java 7+
+    id 'maven-publish'
+    id "com.github.johnrengelman.shadow" version '7.1.2'	// supports only gradle 4.0+ and Java 7+
     id "com.moowork.node" version "1.2.0"
 }
 
 
+// Maven stuff...
+description = 'JavaULBTraining'
+group = "com.objy.training.javaulb"
+version = '1.0.0'
 
 
 
 // Java source settings
-sourceCompatibility = '1.8'
+//sourceCompatibility = '1.14'
+sourceCompatibility = 8
+targetCompatibility = 8
 sourceSets.main.java.srcDirs = ['src/main/java']
 
-ext.isWindows	= org.gradle.internal.os.OperatingSystem.current().windows
-ext.mycmd	= isWindows ? 'cmd' : 'bash'
-ext.myflag	= isWindows ? '/c' : '-c'
+project.ext.isWindows	= org.gradle.internal.os.OperatingSystem.current().windows
+project.ext.mycmd	= isWindows ? 'cmd' : 'bash'
+project.ext.myflag	= isWindows ? '/c' : '-c'
+
+
 
 
 //-----------------------------------------------------
 // Set version values here...
 //-----------------------------------------------------
-ext.thingspanVersion	= project.hasProperty('thingspanVersion') ? thingspanVersion 	:  '15.10'	// default
-ext.objyVersion 	= project.hasProperty('objyVersion')	? objyVersion   	:  '13.3.0' 	// default
+project.ext.productName = "InfiniteGraph"
+project.ext.igVersion	= project.hasProperty('igVersion')	? igVersion 	:  '2022.1'
+project.ext.objyVersion = project.hasProperty('objyVersion')	? objyVersion   :  '13.6.0' 	// default
 
+project.ext.objyinstalldir  =   isWindows ? 'C:\\Program Files' :  '/opt'
+project.ext.objyHome  = project.hasProperty('objyHome')    ? project.objyHome   : objyinstalldir + File.separator + productName + File.separator + igVersion
 
+project.ext.objyLibDir = project.ext.objyHome + File.separator + 'lib'
+project.ext.objydbCoreJar = project.ext.objyLibDir + File.separator + 'objydb-core-' + project.ext.objyVersion + '.jar'
 
-ext.objyinstalldir  =   isWindows ? 'C:\\Program Files' :  '/opt'
-ext.objyHome  = project.hasProperty('objyHome')    ? project.objyHome   : objyinstalldir + File.separator + 'ThingSpan' + File.separator + thingspanVersion
-
-println("objyHome     = $objyHome")
-println("objyVersion     = $objyVersion")
-println("ext.objyVersion     = $ext.objyVersion")
 
 ext.dataDir = ""
 
@@ -48,39 +56,18 @@ ext.GENDATA_DIR		= ROOT_PROJECT_DIR + "/data/gendata/"
 
 
 
-subprojects {
-    apply from: rootProject.file('common.gradle')
 
+
+subprojects {
+//    apply from: rootProject.file('common.gradle')
     apply plugin: "java"
     apply plugin: 'com.github.johnrengelman.shadow'
 
-    dependencies {
-        // ===================================
-        // Local jars
-        // ===================================
-
-        compile files("$objyHome/lib/objydb-core-${objyVersion}.jar")
-        compile 'org.slf4j:slf4j-api:1.8.0-beta1'
-        compile 'org.slf4j:slf4j-log4j12:1.8.0-beta1'
-        compile 'log4j:log4j:1.2.17'
-    }
-
-    //================================================
-    // Artifactory settings
-    //================================================
-    def repositoryUrl = project.hasProperty('repositoryUrl') ? project.repositoryUrl : 'http://elysium.objy.com:8081/artifactory'
-
     repositories {
-        ivy { url = "${repositoryUrl}/release" }
-        //mavenCentral()
-		maven { url 'http://repo1.maven.org/maven2' }
-		maven { url 'https://mvnrepository.com/artifact' }
+        mavenLocal()
+        maven { url 'https://repo1.maven.org/maven2' }
+        maven { url 'https://mvnrepository.com/artifact' }
     }
-
-    ext {
-        objydbBranch = 'release-R13.3.0'
-    }
-
 
 }
 

@@ -104,9 +104,7 @@ public class Lab02c {
 
 
     /**
-     * This function will create two classes, an Egg class and a Carton class.
-     * The Carton class has an attribute that is a list of references to Egg 
-     * objects.
+     * 
      */
     private void createSchema() {
 
@@ -185,11 +183,13 @@ public class Lab02c {
                 // Process the schema changes.
                 SchemaProvider.getDefaultPersistentProvider().activateEdits();
                 
+                logger.info("Address class created in schema.");
+                
                 // Complete and close the transaction
                 tx.complete();
                 tx.close();
                 
-                logger.info("Person class created in schema.");
+                logger.info("NumbersDemo class created in schema.");
 
                 transactionSuccessful = true;
 

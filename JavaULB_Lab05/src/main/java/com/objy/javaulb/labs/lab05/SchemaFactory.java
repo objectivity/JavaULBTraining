@@ -49,9 +49,9 @@ public class SchemaFactory {
 
                 // Use ClassBuilder to create the schema definition.
                 cBuilder = new com.objy.data.ClassBuilder("Person");
-                cBuilder.addAttribute(LogicalType.STRING, "FirstName");
-                cBuilder.addAttribute(LogicalType.STRING, "LastName");
-                cBuilder.addAttribute(LogicalType.STRING, "MiddleName");
+                cBuilder.addAttribute("FirstName", LogicalType.STRING);
+                cBuilder.addAttribute("LastName", LogicalType.STRING);
+                cBuilder.addAttribute("MiddleName", LogicalType.STRING);
 
                 cBuilder.addAttribute("LivesAt",
                             new ListSpecificationBuilder()
@@ -76,11 +76,14 @@ public class SchemaFactory {
 
                 // Use ClassBuilder to create the schema definition.
                 cBuilder = new com.objy.data.ClassBuilder("Address");
-                cBuilder.addAttribute(LogicalType.STRING, "Street1");
-                cBuilder.addAttribute(LogicalType.STRING, "Street2");
-                cBuilder.addAttribute(LogicalType.STRING, "City");
-                cBuilder.addAttribute(LogicalType.STRING, "State");
-                cBuilder.addAttribute(LogicalType.STRING, "ZIP");
+                cBuilder.addAttribute("Street1", LogicalType.STRING);
+                cBuilder.addAttribute("Street2", LogicalType.STRING);
+                cBuilder.addAttribute("City", LogicalType.STRING);
+                cBuilder.addAttribute("State", LogicalType.STRING);
+                cBuilder.addAttribute("ZIP", LogicalType.STRING);
+                cBuilder.addAttribute("Latitude", LogicalType.REAL);
+                cBuilder.addAttribute("Longitude", LogicalType.REAL);
+
 
                 
 
@@ -108,8 +111,8 @@ public class SchemaFactory {
 
                 // Use ClassBuilder to create the schema definition.
                 cBuilder = new com.objy.data.ClassBuilder("LivesEdge");
-                cBuilder.addAttribute(LogicalType.DATE, "BeginDate");
-                cBuilder.addAttribute(LogicalType.DATE, "EndDate");
+                cBuilder.addAttribute("BeginDate", LogicalType.DATE);
+                cBuilder.addAttribute("EndDate", LogicalType.DATE);
 
                 // Create the "ToAddress" end of the bidirectional to-many reference.
                 cBuilder.addAttribute("ToAddress",

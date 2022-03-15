@@ -1,8 +1,10 @@
 package com.objy.javaulb.labs.lab05;
 
 import com.objy.data.Attribute;
+import com.objy.data.DataSpecification;
 import com.objy.data.schemaProvider.SchemaProvider;
 import com.objy.data.Instance;
+import com.objy.data.ListFacet;
 import com.objy.data.LogicalType;
 import com.objy.data.Variable;
 import com.objy.db.Connection;
@@ -10,11 +12,8 @@ import com.objy.db.LockConflictException;
 import com.objy.db.SessionLogging;
 import com.objy.db.TransactionMode;
 import com.objy.db.TransactionScope;
-import com.objy.expression.language.Language;
-import com.objy.expression.language.LanguageRegistry;
 import com.objy.javaulb.utils.LabUtils;
 import com.objy.statement.Statement;
-import java.io.File;
 import java.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,7 +50,10 @@ public class Lab05b {
         try {
             bootFile = LabUtils.validateBootfile();            
 
-            SessionLogging.setLoggingOptions(SessionLogging.LogAll, "D:/Root/temp");
+            String sessionLogDir = System.getProperty("SESSION_LOG_DIR");
+            if (sessionLogDir != null) {
+                SessionLogging.setLoggingOptions(SessionLogging.LogAll, sessionLogDir);
+            }
 
             LabUtils.openConnection(bootFile);            
                       
@@ -101,9 +103,8 @@ public class Lab05b {
                 SchemaProvider.getDefaultPersistentProvider().refresh(true);
 
                 boolean headerPrinted = false;
-
-                Language doLang = LanguageRegistry.lookupLanguage("DO");                
-                Statement statement = new Statement(doLang, doQuery);
+               
+                Statement statement = new Statement("DO", doQuery);
                 Variable vStatementExecute = statement.execute();
 
                 java.util.Iterator<Variable> it = vStatementExecute.sequenceValue().iterator();
@@ -165,7 +166,7 @@ public class Lab05b {
 
 
         try {
-            String oid = ix.getObjectId().toString();
+            String oid = ix.getIdentifier().toString();
             sb.append(String.format("        %12s: %s\n", "OID", oid));
             sb.append(String.format("        %12s: %s\n", "Type", ix.getClass(true).getName()));            
         } catch(NullPointerException npe) {
@@ -176,16 +177,33 @@ public class Lab05b {
             Attribute at = cx.getAttribute(i);
             Variable v = ix.getAttributeValue(at.getName());
 
-            LogicalType lt = at.getAttributeValueSpecification().getFacet().getLogicalType();
+            LogicalType lt = at.getAttributeValueSpecification().getLogicalType();
             
             sb.append(String.format("        %12s: ", at.getName()));
             switch (lt) {
                 case STRING:
                     sb.append(String.format("%s", v.stringValue()));
                     break;
+                case REAL:
+                    sb.append(String.format("%10.5f", v.floatValue()));
+                    break;
                 case REFERENCE:
-//                    String field = atName + ": [" + v.referenceValue().getObjectId().toString() + "]";
-                    sb.append(String.format("%s", v.referenceValue().getObjectId().toString()));
+                    sb.append(String.format("%s", v.referenceValue().getIdentifier().toString()));
+                    break;
+                case LIST:
+                    DataSpecification ds = v.getSpecification().collectionFacet().getElementSpecification();
+                    
+                    logger.info("ds.getFacet().getLogicalType().toString() " + ds.getFacet().getLogicalType().toString());
+                    LogicalType listOfType = ds.getFacet().getLogicalType();
+//                    if (listOfType == LogicalType.REFERENCE) {
+//                        sb.append("LIST of " + listOfType.toString());
+//
+//                        ds.getFacet().
+//
+//                    } else {
+//                        sb.append("LIST of "
+//                                + listOfType.toString() );
+//                    }
                     break;
                 case WALK:
                     // The current attribute of the projection instance is a WALK. 
@@ -284,7 +302,7 @@ public class Lab05b {
             Attribute at = cx.getAttribute(i);
             Variable v = ix.getAttributeValue(at.getName());
 
-            LogicalType lt = at.getAttributeValueSpecification().getFacet().getLogicalType();
+            LogicalType lt = at.getAttributeValueSpecification().getLogicalType();
 
             sb.append(String.format("%-15s    ", at.getName()));
             sbSeparator.append("---------------    ");
@@ -297,7 +315,7 @@ public class Lab05b {
             Attribute at = cx.getAttribute(i);
             Variable v = ix.getAttributeValue(at.getName());
 
-            LogicalType lt = at.getAttributeValueSpecification().getFacet().getLogicalType();
+            LogicalType lt = at.getAttributeValueSpecification().getLogicalType();
             
             sb.append(String.format("%-15s    ", lt.toString()));
         }

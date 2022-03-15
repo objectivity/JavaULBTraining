@@ -57,8 +57,8 @@ public class InstanceFormatter {
         com.objy.data.Class cx = ix.getClass(true);
         if (cx == null) System.err.println(" cx is null");
 
-        if (ix.getObjectId() != null) {
-            sb.append(String.format("        %-15s:    %-15s\n", "OID", ix.getObjectId().toString()));
+        if (ix.getIdentifier() != null) {
+            sb.append(String.format("        %-15s:    %-15s\n", "OID", ix.getIdentifier().toString()));
             sb.append(String.format("        %-15s:    %-15s\n", "Classname", ix.getClass(true).getName()));
             sb.append("        - - - - - - - - - - - - - - - - - - - - - - - - - - -\n");
         }
@@ -79,10 +79,10 @@ public class InstanceFormatter {
                     sb.append(String.format("        %-15s:    %-15s    \n", at.getName(), v.stringValue()));
                     break;
                 case REFERENCE:
-                    sb.append(String.format("        %-15s:    %-15s    \n",  at.getName(), v.referenceValue().getObjectId().toString()));
+                    sb.append(String.format("        %-15s:    %-15s    \n",  at.getName(), v.referenceValue().getIdentifier().toString()));
                     break;
                 case INSTANCE:
-                    sb.append(String.format("        %-15s:    %-15s    \n",  at.getName(), v.instanceValue().getObjectId().toString()));
+                    sb.append(String.format("        %-15s:    %-15s    \n",  at.getName(), v.instanceValue().getIdentifier().toString()));
                     break;
                 case LIST:
                     LogicalType ltOfListAttr = at.getAttributeValueSpecification().collectionFacet().getElementSpecification().getLogicalType();
@@ -124,7 +124,7 @@ public class InstanceFormatter {
 
         for (int i = 0; i < list.size(); i++) {
             sb.append(String.format("                               %s",
-                    list.get(i).referenceValue().getObjectId().toString()));
+                    list.get(i).referenceValue().getIdentifier().toString()));
             if (i != list.size()-1) {
                 sb.append(",\n");
             }

@@ -141,6 +141,8 @@ public class Lab02h {
                 // Represent the new class into the federated database.
                 SchemaProvider.getDefaultPersistentProvider().represent(cAddress);
                 
+                logger.info("Address class created in schema.");
+                
                 
 
                 // Use ClassBuilder to create the schema definition.

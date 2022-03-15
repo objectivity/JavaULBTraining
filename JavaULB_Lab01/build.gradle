@@ -1,15 +1,33 @@
 
 
-def version = "0.1"
-
-
-// Java source settings
-sourceCompatibility = '1.8'
-sourceSets.main.java.srcDirs = ['src/main/java']
-
-
-
 def LAB_NAME = "Lab01"
+
+
+
+// Maven stuff...
+description = 'JavaULB_Lab01'
+group = "com.objy.javaulb.labs.lab01"
+version = '1.0.0'
+
+
+
+
+//-----------------------------------------------------
+// Set version values here...
+//-----------------------------------------------------
+ext.igVersion       = rootProject.igVersion
+ext.objyVersion     = rootProject.objyVersion
+ext.objyinstalldir  = rootProject.objyinstalldir 
+ext.objyHome        = rootProject.objyHome 
+
+
+println("igVersion             = $igVersion")
+println("objyVersion           = $objyVersion")
+println("objyinstalldir        = $objyinstalldir")
+println("objyHome              = $objyHome")
+
+
+
 
 def xPROJECT_DIR        = "" + getProjectDir()
 def PROJECT_DIR		= xPROJECT_DIR.replaceAll("\\\\", "/")
@@ -53,72 +71,45 @@ def jnldirpath       = project.hasProperty('jnldirpath')        ? project.jnldir
 def bootfile		 = "${fddirpath}/${fdname}.boot"
 // When expressing the full, UNC path the "${fddirhost}::" causes havoc on Windows/DOS.
 
+print("project.ext.objydbCoreJar = ${objydbCoreJar}")
+
+dependencies {
+    implementation files(objydbCoreJar)
+    implementation 'org.slf4j:slf4j-api:1.8.0-beta1'
+    implementation 'org.slf4j:slf4j-log4j12:1.8.0-beta1'
+    implementation 'log4j:log4j:1.2.17'
+}
+
+assemble.dependsOn("shadowJar")
+
+shadowJar {
+    configurations = [project.configurations.compileClasspath]
+    zip64 true
+}
+
+
+
 
 //==================================
 // Tasks
 //==================================
 
-task envVars () {
-    doLast {
-        println("------------------------------------------")
-        println("objyHome     = $objyHome")
-        println("PROJECT_DIR   = $PROJECT_DIR")
-//        println("BUILD_DIR    = $BUILD_DIR")
-	println("fdname       = $fdname")
-	println("fddirhost    = $fddirhost")
-	println("fddirpath    = $fddirpath")
-        println("jnldirpath    = jnldirpath")
-        println("bootfile     = $bootfile")
-        println("------------------------------------------")
-    }
-}
-
-
-project (':JavaULB_Lab01') {
-    dependencies {
-        // Third party dependency
-        compile files("$objyHome/lib/objydb-core-${objyVersion}.jar")
-
-        compile 'org.slf4j:slf4j-api:1.8.0-beta1'
-        compile 'org.slf4j:slf4j-log4j12:1.8.0-beta1'
-        compile 'log4j:log4j:1.2.17'
-    }
-
-    // Start shadowJar task before test phase
-    test.dependsOn("shadowJar")
-    
-    
-    // Configure the shadow jar task
-    shadowJar {
-        zip64 true
-        dependencies {
-            include(dependency('com.objy.objydb:objydb-core:.*'))
-
-            include(dependency('org.slf4j:slf4j-api:1.8.0-beta1'))
-            include(dependency('org.slf4j:slf4j-log4j12:1.8.0-beta1'))
-            include(dependency('log4j:log4j:1.2.17'))
-        }
-    }
-}
-
 
 
 task cb(type: GradleBuild) {
+    group = "JavaULB_Lab01"
+    description = "Clean and Build."
     tasks = [ 'clean', 'build' ]
 }
 
 
 // Create FD
 task recreateFD(){
+    group = "JavaULB_Lab01"
+    description = "Recreate the federation."
     doLast{
         makeDir(fddirpath)
         makeDir(jnldirpath)
-
-	println "fddirhost is  ${fddirhost}"
-	println "fddirpath is  ${fddirpath}"
-	println "fdname is     ${fdname}"
-	println "bootfile is   ${bootfile}"
-
 
         // TODO: Check lockserver
 
@@ -143,8 +134,11 @@ task recreateFD(){
 }
 
 
+
 // Load the schema into the federation.
 task loadSchema () {
+    group = "JavaULB_Lab01"
+    description = "Load the schema into the federation."
 
     doLast{
         println("Loading core schema file: ${SCHEMA_FILE}")
@@ -157,20 +151,27 @@ task loadSchema () {
 }
 
 
+
+
+def appClassPath = "${LIB_DIR}/JavaULB_${LAB_NAME}-1.0.0-all.jar"
+//println("appClassPath = ${appClassPath}")
+
 task run01() {
+
+    group = "JavaULB_Lab01"
+    description = "Run Lab01."
 
     doLast{
 	println("Running 'run01'")
         println("LIB_DIR = ${LIB_DIR}")
         javaexec{
-            classpath("${LIB_DIR}/JavaULB_${LAB_NAME}-1.0-SNAPSHOT-all.jar",                    
-                     "${objyHome}/lib/objydb-core-${objyVersion}.jar")
+            classpath("${appClassPath}")
             jvmArgs = [\
             "-Xmx8G", \
             "-DBOOT_FILE=${bootfile}", \
             "-Dlog4j.configuration=file:${PROJECT_DIR}/properties/log4j.properties"
             ]
-            main = "com.objy.javaulb.labs.lab01.Lab01"
+            mainClass = "com.objy.javaulb.labs.lab01.Lab01"
             standardInput = System.in
             if (project.hasProperty('args')) {
                     args(args.split(','))
@@ -178,7 +179,6 @@ task run01() {
         }
     }
 }
-
 
 
 

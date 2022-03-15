@@ -20,6 +20,9 @@ UPDATE SCHEMA {
 		Street	: STRING,
 		City	: STRING,
 		State	: STRING,
+		ZIP		: STRING,
+		Latitude : REAL {STORAGE: B32},
+		Longitude : REAL {STORAGE: B32},
         LivesHere
               : List {
                   element: Reference {

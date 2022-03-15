@@ -148,9 +148,9 @@ public class Lab03f {
                 Instance iPerson = Instance.createPersistent(cPerson);
 
                 // Get and retain the OID of the Instance object we just created.
-                personOID = iPerson.getObjectId().toString();
+                personOID = iPerson.getIdentifier().toString();
 
-                logger.info("iPerson OID: " + iPerson.getObjectId().toString());
+                logger.info("iPerson OID: " + iPerson.getIdentifier().toString());
 
                 // We access the value of each attribute in the Instance using
                 // a variable that we 'associate' with each attribute.

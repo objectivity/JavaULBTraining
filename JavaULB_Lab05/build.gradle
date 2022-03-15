@@ -1,21 +1,11 @@
 
-
-
 def LAB_NAME = "Lab05"
 
-def version = "0.1"
+// Maven stuff...
+description = 'JavaULB_Lab05'
+group = "com.objy.javaulb.labs.lab05"
+version = '1.0.0'
 
-
-// Java source settings
-sourceCompatibility = '1.8'
-sourceSets.main.java.srcDirs = ['src/main/java']
-
-
-
-println  "Root project:   ${project.rootProject}";
-println  "  rootDir:      ${project.rootDir}"
-println  "  projectDir:   ${project.projectDir}";
-println  "  project dir:  ${System.getProperty("user.dir")}";
 
 
 
@@ -31,6 +21,8 @@ def PMD_FILE            = PROJECT_DIR+"/data/"+LAB_NAME+".pmd"
 
 def BOOTFILE_FULLPATH
 def BOOTFILE_DIR
+
+def SESSION_LOG_DIR     = PROJECT_DIR+"/sessionLogs";
 
 if (System.getProperty('os.name').toLowerCase(Locale.ROOT).contains('windows')) {
     //---------------------------------------
@@ -70,35 +62,20 @@ def schema05bDOFile = PROJECT_DIR+"/data/scripts/schema05b.do"
 
 
 
-project (':JavaULB_Lab05') {
-    dependencies {
-        compile project(path: ':JavaULB_Utils', configuration: 'shadow')
 
-        // Third party dependency
-        compile files("$objyHome/lib/objydb-core-${objyVersion}.jar")
+dependencies {
+    implementation project(path: ':JavaULB_Utils', configuration: 'shadow')
+    implementation files(objydbCoreJar)
+    implementation 'org.slf4j:slf4j-api:1.8.0-beta1'
+    implementation 'org.slf4j:slf4j-log4j12:1.8.0-beta1'
+    implementation 'log4j:log4j:1.2.17'
+}
 
-        compile 'org.slf4j:slf4j-api:1.8.0-beta1'
-        compile 'org.slf4j:slf4j-log4j12:1.8.0-beta1'
-        compile 'log4j:log4j:1.2.17'
-    }
+assemble.dependsOn("shadowJar")
 
-    // Start shadowJar task before test phase
-    test.dependsOn("shadowJar")
-
-
-    // Configure the shadow jar task
-    shadowJar {
-        zip64 true
-        dependencies {
-            include(dependency(':JavaULB_Utils'))
-
-            include(dependency('com.objy.objydb:objydb-core:.*'))
-
-            include(dependency('org.slf4j:slf4j-api:1.8.0-beta1'))
-            include(dependency('org.slf4j:slf4j-log4j12:1.8.0-beta1'))
-            include(dependency('log4j:log4j:1.2.17'))
-        }
-    }
+shadowJar {
+    configurations = [project.configurations.compileClasspath]
+    zip64 true
 }
 
 
@@ -181,6 +158,8 @@ task loadSchema05a() {
 }
 
 
+def appClassPath = "${LIB_DIR}/JavaULB_${LAB_NAME}-${version}-all.jar"
+
 task run05a() {
     dependsOn recreateFD
     
@@ -188,8 +167,7 @@ task run05a() {
 	println("Running 'run05a'")
         println("LIB_DIR = ${LIB_DIR}")
         javaexec{
-            classpath("${LIB_DIR}/JavaULB_${LAB_NAME}-1.0-SNAPSHOT-all.jar",                    
-                     "${objyHome}/lib/objydb-core-${objyVersion}.jar")
+            classpath = files("${appClassPath}")
             jvmArgs = [\
                 "-Xmx8G", \
                 "-DBOOT_FILE=${bootfile}", \
@@ -197,7 +175,7 @@ task run05a() {
                 "-DDataDir=${GENDATA_DIR}", \
                 "-Dlog4j.configuration=file:${PROJECT_DIR}/properties/log4j.properties"
             ]
-            main = "com.objy.javaulb.labs.lab05.Lab05a"
+            mainClass = "com.objy.javaulb.labs.lab05.Lab05a0"
             standardInput = System.in
             if (project.hasProperty('args')) {
                     args(args.split(','))
@@ -227,16 +205,16 @@ task run05b() {
 	println("Running 'run05b'")
         println("LIB_DIR = ${LIB_DIR}")
         javaexec{
-            classpath("${LIB_DIR}/JavaULB_${LAB_NAME}-1.0-SNAPSHOT-all.jar",                    
-                     "${objyHome}/lib/objydb-core-${objyVersion}.jar")
+            classpath = files("${appClassPath}")
             jvmArgs = [\
                 "-Xmx8G", \
                 "-DBOOT_FILE=${bootfile}", \
                 "-DAppConfig=${ROOT_PROJECT_DIR}/config/AppConfig.properties", \
                 "-DDataDir=${GENDATA_DIR}", \
+                "-DSESSION_LOG_DIR=${SESSION_LOG_DIR}", \
                 "-Dlog4j.configuration=file:${PROJECT_DIR}/properties/log4j.properties"
             ]
-            main = "com.objy.javaulb.labs.lab05.Lab05b"
+            mainClass = "com.objy.javaulb.labs.lab05.Lab05b"
             standardInput = System.in
             if (project.hasProperty('args')) {
                     args(args.split(','))

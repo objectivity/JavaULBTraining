@@ -70,7 +70,7 @@ public class DataFactory {
                     Instance iAddress = creatAddressInstance(address);
                     
                     logger.info("-----------------------------------------------");
-                    logger.info("Address: " + " :: " + iAddress.getObjectId().toString());
+                    logger.info("Address: " + " :: " + iAddress.getIdentifier().toString());
 
                     int pCount = (i == 0)? 4 : (int)(Math.random() * 5);
 
@@ -88,7 +88,7 @@ public class DataFactory {
 
                         iPerson = createPersonInstance(name);
                         
-                        logger.info("Person: " + name.last + ", " + name.first + " :: " + iPerson.getObjectId().toString());
+                        logger.info("Person: " + name.last + ", " + name.first + " :: " + iPerson.getIdentifier().toString());
 
                         // We only have to set one end of the relationship.
                         // The other end is set automatically based on the schema
@@ -164,7 +164,7 @@ public class DataFactory {
         // Using the cPerson Class object, create a Person Instance.
         Instance iPerson = Instance.createPersistent(cPerson);
 
-        //logger.info("iPerson OID: " + iPerson.getObjectId().toString());
+        //logger.info("iPerson OID: " + iPerson.getIdentifier().toString());
 
         // We access the value of each attribute in the Instance using
         // a variable that we 'associate' with each attribute.

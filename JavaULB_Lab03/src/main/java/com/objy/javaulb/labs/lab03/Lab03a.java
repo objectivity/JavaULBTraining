@@ -120,7 +120,7 @@ public class Lab03a {
                 // Using the cPerson Class object, create a Person Instance.
                 Instance iPerson = Instance.createPersistent(cPerson);
                 
-                logger.info("iPerson OID: " + iPerson.getObjectId().toString());
+                logger.info("iPerson OID: " + iPerson.getIdentifier().toString());
                 
                 
                 // The complete writes the data out to the database.
