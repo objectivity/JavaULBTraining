@@ -238,13 +238,13 @@ public class Lab03e {
 
                 // Use ClassBuilder to create the schema definition.
                 com.objy.data.ClassBuilder cBuilder = new com.objy.data.ClassBuilder("Person");
-                cBuilder.addAttribute(LogicalType.STRING, "FirstName");
-                cBuilder.addAttribute(LogicalType.STRING, "LastName");
-                cBuilder.addAttribute(LogicalType.STRING, "MiddleInitial");
+                cBuilder.addAttribute("FirstName", LogicalType.STRING);
+                cBuilder.addAttribute("LastName", LogicalType.STRING);
+                cBuilder.addAttribute("MiddleInitial", LogicalType.STRING);
 
-                cBuilder.addAttribute(LogicalType.DATE, "DateOfBirth");
+                cBuilder.addAttribute("DateOfBirth", LogicalType.DATE);
 
-                cBuilder.addAttribute(LogicalType.DATE_TIME, "Timestamp");
+                cBuilder.addAttribute("Timestamp", LogicalType.DATE_TIME);
 
                 cBuilder.addAttribute(
                         "MyPhoneNumbers",

@@ -210,11 +210,11 @@ public class Lab03f {
 
                 // Use ClassBuilder to create the schema definition.
                 com.objy.data.ClassBuilder cBuilder = new com.objy.data.ClassBuilder("Person");
-                cBuilder.addAttribute(LogicalType.STRING, "FirstName");
-                cBuilder.addAttribute(LogicalType.STRING, "LastName");
-                cBuilder.addAttribute(LogicalType.STRING, "MiddleInitial");
+                cBuilder.addAttribute("FirstName", LogicalType.STRING);
+                cBuilder.addAttribute("LastName", LogicalType.STRING);
+                cBuilder.addAttribute("MiddleInitial", LogicalType.STRING);
 
-                cBuilder.addAttribute(LogicalType.DATE, "DateOfBirth");
+                cBuilder.addAttribute("DateOfBirth", LogicalType.DATE);
 
                 // Create the "Knows" end of the bidirectional to-many reference.
                 cBuilder.addAttribute("Knows",

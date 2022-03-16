@@ -174,9 +174,9 @@ public class Lab03b {
 
                 // Use ClassBuilder to create the schema definition.
                 com.objy.data.ClassBuilder cBuilder = new com.objy.data.ClassBuilder("Person");
-                cBuilder.addAttribute(LogicalType.STRING, "FirstName");
-                cBuilder.addAttribute(LogicalType.STRING, "LastName");
-                cBuilder.addAttribute(LogicalType.STRING, "MiddleInitial");
+                cBuilder.addAttribute("FirstName", LogicalType.STRING);
+                cBuilder.addAttribute("LastName", LogicalType.STRING);
+                cBuilder.addAttribute("MiddleInitial", LogicalType.STRING);
 
                 // Actually build the the schema representation.
                 com.objy.data.Class cPerson = cBuilder.build();

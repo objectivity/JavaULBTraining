@@ -151,15 +151,16 @@ public class Lab03h {
 
 
                 com.objy.data.ClassBuilder cBuilderAddress = new com.objy.data.ClassBuilder("Address");
-                cBuilderAddress.addAttribute(LogicalType.STRING, "Street1");
-                cBuilderAddress.addAttribute(LogicalType.STRING, "Street2");
-                cBuilderAddress.addAttribute(LogicalType.STRING, "City");
-                cBuilderAddress.addAttribute(LogicalType.STRING, "State");
-                cBuilderAddress.addAttribute(LogicalType.STRING, "ZIP");
+                cBuilderAddress.addAttribute("Street1", LogicalType.STRING);
+                cBuilderAddress.addAttribute("Street2", LogicalType.STRING);
+                cBuilderAddress.addAttribute("City", LogicalType.STRING);
+                cBuilderAddress.addAttribute("State", LogicalType.STRING);
+                cBuilderAddress.addAttribute("ZIP", LogicalType.STRING);
 
-                cBuilderAddress.addAttribute("GeoLocation", new InstanceSpecificationBuilder()
-                                    .setClass("GeoLocation")
-                                    .build());
+                cBuilderAddress.addAttribute("GeoLocation", 
+                                        new InstanceSpecificationBuilder()
+                                                .setClass("GeoLocation")
+                                                .build());
 
                 // Actually build the the schema representation.
                 com.objy.data.Class cAddress = cBuilderAddress.build();
