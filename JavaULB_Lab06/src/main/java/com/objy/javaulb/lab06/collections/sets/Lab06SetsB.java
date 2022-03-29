@@ -189,14 +189,12 @@ public class Lab06SetsB {
 
 
     /**
-     * This method creates an instance of MyType which contains a com.objy.data.Map
-     * attribute and then puts some things in the map.
+     * This method creates an instance of Person which contains a com.objy.data.Set
+     * attribute and then puts some references to Phone objects in the set.
      */
     private void addEntries() {
 
         logger.info("addEntries() - Begin...");
-
-
 
         int transLCERetryCount = 0;
         boolean transactionSuccessful = false;
@@ -207,7 +205,7 @@ public class Lab06SetsB {
                 // Ensure that our view of the schema is up to date.
                 SchemaProvider.getDefaultPersistentProvider().refresh(true);
 
-                // Create an instance of MyType
+                // Create an instance of Person
                 com.objy.data.Class cPerson = com.objy.data.Class.lookupClass("Person");
                 Instance iPerson = Instance.createPersistent(cPerson);
 
@@ -244,11 +242,8 @@ public class Lab06SetsB {
                 // Set the phoneNumber attribute in the instance.
                 iPhoneNumber.getAttributeValue("phoneNumber").set("999-999-9999");
                 pnOID999 = iPhoneNumber.getIdentifier().toString();
-                    
-                    
 
                 logger.info("Calling tx.complete()...");
-
 
                 // Complete and close the transaction
                 tx.complete();
@@ -293,14 +288,14 @@ public class Lab06SetsB {
                 Statement statement;
 
                 try {
-                    String doQuery = "FROM Person return *";
+                    String doQuery = "FROM Person return *;";
 
                     logger.info("doQuery: <" + doQuery + ">");
                     statement = new Statement("DO", doQuery);
 
                     Iterator<Variable> it = statement.execute().sequenceValue().iterator();
 
-                    // Loop over the MyType objects in the results.
+                    // Loop over the Person objects in the results.
                     while (it.hasNext()) {
 
                         Variable v = it.next();
@@ -312,9 +307,9 @@ public class Lab06SetsB {
                         logger.info("Person OID = " + personOID);
 
                         //------------------------------------------------------
-                        // Process the MyStringList attribute.
+                        // Process the phoneNumbers attribute.
 
-                        // Get the MyStringList attribute from the current MyListType object.
+                        // Get the phoneNumbers attribute from the current Person object.
                         com.objy.data.Set pnSet = iPerson.getAttributeValue("phoneNumbers").setValue();
                         
                         
@@ -368,9 +363,7 @@ public class Lab06SetsB {
                 }
 
 
-
                 logger.info("Calling tx.complete()...");
-
 
                 // Complete and close the transaction
                 tx.complete();

@@ -1,4 +1,5 @@
-package com.objy.javaulb.lab06.collections.sets;
+package com.objy.javaulb.lab06.collections.lists;
+
 
 
 import com.objy.data.Attribute;
@@ -19,8 +20,10 @@ import com.objy.db.TransactionScope;
 import com.objy.statement.Statement;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Properties;
+import java.util.Random;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,9 +31,9 @@ import org.slf4j.LoggerFactory;
  *
  * @author Daniel
  */
-public class Lab06SetsA {
+public class Lab06ListsB {
 
-    private static Logger logger = LoggerFactory.getLogger(Lab06SetsA.class);
+    private static Logger logger = LoggerFactory.getLogger(Lab06ListsB.class);
 
 
     // The System.getProperties() value from which various things will be read.
@@ -46,7 +49,7 @@ public class Lab06SetsA {
     private String pnOID999;
 
 
-    public Lab06SetsA() {
+    public Lab06ListsB() {
 
         logger.info("Running " + this.getClass().getSimpleName());
 
@@ -133,18 +136,27 @@ public class Lab06SetsA {
 
                 Statement statement;
 
+                
+                
+//                            + "                     Storage: Variable,\n"
                 try {
                     String doQuery
                             = "UPDATE SCHEMA {\n"
-                            + "    CREATE CLASS PhoneNumber {\n"
-                            + "         phoneNumber : String\n"
+                            + "    CREATE CLASS Company {\n"
+                            + "         name      : String,\n"
+                            + "         employees : List {\n"
+                            + "                     Element: Reference {\n"
+                            + "                         Referenced: Person, Inverse: employers \n"
+                            + "                         }\n"
+                            + "                    }\n"
                             + "    }\n"
                             + "    CREATE CLASS Person {\n"
-                            + "         name : String,\n"
-                            + "         phoneNumbers  : Set {\n"
-                            + "                     Element: Reference { Referenced: PhoneNumber },\n"
-                            + "                     CollectionTypeName: TreeSetOfReferences\n"
-                            +"                      }\n"
+                            + "         name      : String,\n"
+                            + "         employers  : List {\n"
+                            + "                     Element: Reference {\n"
+                            + "                         Referenced: Company, Inverse: employees \n"
+                            + "                         }\n"
+                            + "                     }\n"
                             + "     }\n"
                             + "}";
 
@@ -206,43 +218,47 @@ public class Lab06SetsA {
                 SchemaProvider.getDefaultPersistentProvider().refresh(true);
 
                 // Create an instance of Person
-                com.objy.data.Class cPerson = com.objy.data.Class.lookupClass("Person");
-                Instance iPerson = Instance.createPersistent(cPerson);
-
-                String phoneNumbers[] = { 
-                    "111-111-1111", "222-222-2222", "333-333-3333", 
-                    "444-444-4444", "555-555-5555" 
-                };
+                com.objy.data.Class cCompany = com.objy.data.Class.lookupClass("Company");
                 
-                com.objy.data.Class cPhoneNumber = com.objy.data.Class.lookupClass("PhoneNumber");
-
-                // Get the phoneNumber set from the iPerson instance object.
-                com.objy.data.Set pnSet = iPerson.getAttributeValue("phoneNumbers").setValue();
-                
-                for (String pn  : phoneNumbers) {
-                    
-                    // Create the PhoneNumber instance object.
-                    Instance iPhoneNumber = Instance.createPersistent(cPhoneNumber);
-                    
-                    pnOIDS.add(iPhoneNumber.getIdentifier().toString());
-                    
-                    // Set the phoneNumber attribute in the instance.
-                    iPhoneNumber.getAttributeValue("phoneNumber").set(pn);
-                    
-                    Reference refPN = new Reference(iPhoneNumber);
-                    Variable vPN = new Variable(refPN);
-                    
-                    // Add the current phoneNumber (that has been wrapped in a Variable)
-                    // to the set.
-                    pnSet.add(vPN);
+                ArrayList<Instance> iCompanies = new ArrayList<>();
+                for (int c = 0; c < 10; c++) {
+                    Instance iCompany = Instance.createPersistent(cCompany);
+                    iCompany.getAttributeValue("name").set("Company-" + c);
+                    iCompanies.add(iCompany);
                 }
                 
-                // Create one PhoneNumber that is not associated with the Person.
-                Instance iPhoneNumber = Instance.createPersistent(cPhoneNumber);
-                // Set the phoneNumber attribute in the instance.
-                iPhoneNumber.getAttributeValue("phoneNumber").set("999-999-9999");
-                pnOID999 = iPhoneNumber.getIdentifier().toString();
-
+                
+                com.objy.data.Class cPerson = com.objy.data.Class.lookupClass("Person");
+                ArrayList<Instance> iPersons = new ArrayList<>();
+                for (int p = 0; p < 10; p++) {
+                    Instance iPerson = Instance.createPersistent(cPerson);
+                    iPerson.getAttributeValue("name").set("Person-" + p);
+                    iPersons.add(iPerson);
+                }
+                
+                Random random = new Random();
+                for (Instance iPerson : iPersons) {
+                    int employerCount = 1 + random.nextInt(3); // 1 + [0, .., 2]
+                    
+                    HashMap<Integer,Integer> used = new HashMap<>();
+                    for (int c = 0 ; c < employerCount; c++) {
+                        int companyIndex = random.nextInt(iCompanies.size());
+                        if (used.containsKey(companyIndex)) {
+                            c--;
+                            continue;
+                        } else {
+                            used.put(companyIndex, companyIndex);
+                            Instance iCompany = iCompanies.get(companyIndex);
+                            
+                            com.objy.data.Reference refCompany = new Reference(iCompany);
+                            Variable vrefCompany = new Variable();
+                            vrefCompany.set(refCompany);
+                            
+                            iPerson.getAttributeValue("employers").listValue().add(vrefCompany);                            
+                        }
+                    }
+                }
+                
                 logger.info("Calling tx.complete()...");
 
                 // Complete and close the transaction
@@ -295,66 +311,41 @@ public class Lab06SetsA {
 
                     Iterator<Variable> it = statement.execute().sequenceValue().iterator();
 
+                    logger.info("---------------------------------------"); 
+                    
                     // Loop over the Person objects in the results.
                     while (it.hasNext()) {
 
                         Variable v = it.next();
                         Instance iPerson = v.instanceValue();                        
                         String personOID = iPerson.getIdentifier().toString();
-
+                        
                         logger.info("Person OID = " + personOID);
+                        logger.info("name = " + iPerson.getAttributeValue("name").stringValue());
 
                         //------------------------------------------------------
-                        // Process the phoneNumbers attribute.
+                        // Process the employers attribute.
 
-                        // Get the phoneNumbers attribute from the current Person object.
-                        com.objy.data.Set pnSet = iPerson.getAttributeValue("phoneNumbers").setValue();
+                        // Get the employers attribute from the current Person object.
+                        com.objy.data.List employerList = iPerson.getAttributeValue("employers").listValue();
                         
-                        logger.info("---------------------------------------");
-                        logger.info("set.contains() tests...");
-                        com.objy.data.Reference rPN = new Reference(ObjectId.fromString(pnOID999));
-                        Variable vPNTest = new Variable();
-                        vPNTest.set(rPN);
-                        
-                        if (pnSet.contains(vPNTest)) {
-                            logger.info("Person{" + personOID + "}"
-                                    + ".phoneNumbers[...] contains " + pnOID999);
-                        } else {
-                            logger.info("Person{" + personOID + "}"
-                                    + ".phoneNumbers[...] does not contain " + pnOID999);
-                        }                        
-                        
-                        rPN = new Reference(ObjectId.fromString(pnOIDS.get(1)));
-                        vPNTest.set(rPN);
-                        
-                        if (pnSet.contains(vPNTest)) {
-                            logger.info("Person{" + personOID + "}"
-                                    + ".phoneNumbers[...] contains " + pnOIDS.get(1));
-                        } else {
-                            logger.info("Person{" + personOID + "}"
-                                    + ".phoneNumbers[...] does not contain " + pnOIDS.get(1));
-                        }
-                        
-                        logger.info("---------------------------------------");
-                        logger.info("set.elements().iterator()...");
-                        
-
-                        // Iterate over the phoneNumbers in the set.
-                        com.objy.data.Sequence pnSeq = pnSet.elements();
-                        Iterator<Variable> setIt = pnSeq.iterator();
+                        // Iterate over the employers in the set.
+                        com.objy.data.Sequence empList = employerList.elements();
+                        Iterator<Variable> setIt = empList.iterator();
                         int i = 0;
                         while(setIt.hasNext()) {
-                            Variable vPN = setIt.next();
-                            Reference refPN = vPN.referenceValue();                            
-                            Instance iPN = refPN.getReferencedObject();
+                            Variable vCompany = setIt.next();
+                            Reference refCompany = vCompany.referenceValue();                            
+                            Instance iCompany = refCompany.getReferencedObject();
                             
                             logger.info("Person{" + personOID + "}"
-                                    + ".phoneNumbers[" + i + "]"
-                                    + ".phoneNumber{" + refPN.getIdentifier().toString() + "} = " + iPN.getAttributeValue("phoneNumber").stringValue());
+                                    + ".employers[" + i + "]{" + refCompany.getIdentifier().toString() + "}"
+                                    + ".name = " + iCompany.getAttributeValue("name").stringValue());
                             i++;
                         }
-                        logger.info("---------------------------------------");
+                        logger.info("---------------------------------------");                        
                     }
+                    
                 } catch(Exception ex) {
                     ex.printStackTrace();
                     break;
@@ -594,6 +585,6 @@ public class Lab06SetsA {
 
 
     public static void main(String[] args) {
-        new Lab06SetsA();
+        new Lab06ListsB();
     }
 }
