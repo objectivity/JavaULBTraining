@@ -82,7 +82,7 @@ public class Lab02a {
     private void openConnection(String bootFile) throws Exception {
 
         connection = new Connection(bootFile);
-
+        
         logger.info("Connected to ThingSpan federation: " + bootFile);
 
     }
