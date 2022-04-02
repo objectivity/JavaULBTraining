@@ -144,6 +144,65 @@ task recreateFD(){
 
 def appClassPath = "${LIB_DIR}/JavaULB_${LAB_NAME}-${version}-all.jar"
 
+task run06ListsA() {
+
+    doLast{
+	println("Running 'run06ListsA'")
+        println("LIB_DIR = ${LIB_DIR}")
+        println("PROJECT_DIR = ${PROJECT_DIR}")
+        javaexec{
+            classpath = files("${appClassPath}")
+            jvmArgs = [\
+                "-Xmx8G", \
+                "-DBOOT_FILE=${bootfile}", \
+                "-DSESSION_LOG_DIR=${sessionLogDir}", \
+                "-DFEMALE_NAME_FILE=${project.rootDir}/data/gendata/dist.female.first.txt", \
+                "-DMALE_NAME_FILE=${project.rootDir}/data/gendata/dist.male.first.txt", \
+                "-DLAST_NAME_FILE=${project.rootDir}/data/gendata/dist.all.last.txt", \
+                "-DADDRESSES_FILE=${project.rootDir}/data/gendata/addresses.txt", \
+                "-Dlog4j.configuration=file:${PROJECT_DIR}/properties/log4j.properties", \
+                "-Dcom.objy.suppress-loadpath=TRUE"
+            ]
+            mainClass = "com.objy.javaulb.lab06.collections.lists.Lab06ListsA"
+            standardInput = System.in
+            if (project.hasProperty('args')) {
+                    args(args.split(','))
+            }
+        }
+    }
+}
+
+task run06ListsB() {
+
+    doLast{
+	println("Running 'run06ListsA'")
+        println("LIB_DIR = ${LIB_DIR}")
+        println("PROJECT_DIR = ${PROJECT_DIR}")
+        javaexec{
+            classpath = files("${appClassPath}")
+            jvmArgs = [\
+                "-Xmx8G", \
+                "-DBOOT_FILE=${bootfile}", \
+                "-DSESSION_LOG_DIR=${sessionLogDir}", \
+                "-DFEMALE_NAME_FILE=${project.rootDir}/data/gendata/dist.female.first.txt", \
+                "-DMALE_NAME_FILE=${project.rootDir}/data/gendata/dist.male.first.txt", \
+                "-DLAST_NAME_FILE=${project.rootDir}/data/gendata/dist.all.last.txt", \
+                "-DADDRESSES_FILE=${project.rootDir}/data/gendata/addresses.txt", \
+                "-Dlog4j.configuration=file:${PROJECT_DIR}/properties/log4j.properties", \
+                "-Dcom.objy.suppress-loadpath=TRUE"
+            ]
+            mainClass = "com.objy.javaulb.lab06.collections.lists.Lab06ListsB"
+            standardInput = System.in
+            if (project.hasProperty('args')) {
+                    args(args.split(','))
+            }
+        }
+    }
+}
+
+
+
+
 task run06MapsA() {
 
     doLast{
@@ -227,10 +286,13 @@ task run06MapsC() {
 
 
 
-task run06ListsA() {
+
+
+
+task run06SetsA() {
 
     doLast{
-	println("Running 'run06ListsA'")
+	println("Running 'run06SetsA'")
         println("LIB_DIR = ${LIB_DIR}")
         println("PROJECT_DIR = ${PROJECT_DIR}")
         javaexec{
@@ -243,9 +305,10 @@ task run06ListsA() {
                 "-DMALE_NAME_FILE=${project.rootDir}/data/gendata/dist.male.first.txt", \
                 "-DLAST_NAME_FILE=${project.rootDir}/data/gendata/dist.all.last.txt", \
                 "-DADDRESSES_FILE=${project.rootDir}/data/gendata/addresses.txt", \
-                "-Dlog4j.configuration=file:${PROJECT_DIR}/properties/log4j.properties"
+                "-Dlog4j.configuration=file:${PROJECT_DIR}/properties/log4j.properties", \
+                "-Dcom.objy.suppress-loadpath=TRUE"
             ]
-            mainClass = "com.objy.javaulb.lab06.collections.lists.Lab06ListsA"
+            mainClass = "com.objy.javaulb.lab06.collections.sets.Lab06SetsA"
             standardInput = System.in
             if (project.hasProperty('args')) {
                     args(args.split(','))
@@ -253,6 +316,35 @@ task run06ListsA() {
         }
     }
 }
+
+task run06SetsB() {
+
+    doLast{
+	println("Running 'run06SetsB'")
+        println("LIB_DIR = ${LIB_DIR}")
+        println("PROJECT_DIR = ${PROJECT_DIR}")
+        javaexec{
+            classpath = files("${appClassPath}")
+            jvmArgs = [\
+                "-Xmx8G", \
+                "-DBOOT_FILE=${bootfile}", \
+                "-DSESSION_LOG_DIR=${sessionLogDir}", \
+                "-DFEMALE_NAME_FILE=${project.rootDir}/data/gendata/dist.female.first.txt", \
+                "-DMALE_NAME_FILE=${project.rootDir}/data/gendata/dist.male.first.txt", \
+                "-DLAST_NAME_FILE=${project.rootDir}/data/gendata/dist.all.last.txt", \
+                "-DADDRESSES_FILE=${project.rootDir}/data/gendata/addresses.txt", \
+                "-Dlog4j.configuration=file:${PROJECT_DIR}/properties/log4j.properties", \
+                "-Dcom.objy.suppress-loadpath=TRUE"
+            ]
+            mainClass = "com.objy.javaulb.lab06.collections.sets.Lab06SetsB"
+            standardInput = System.in
+            if (project.hasProperty('args')) {
+                    args(args.split(','))
+            }
+        }
+    }
+}
+
 
 
 
