@@ -235,9 +235,10 @@ task run02a() {
             jvmArgs = [\
             "-Xmx8G", \
             "-DBOOT_FILE=${bootfile}", \
-            "-Dlog4j.configuration=file:${PROJECT_DIR}/properties/log4j.properties"
+            "-Dlog4j.configuration=file:${PROJECT_DIR}/properties/log4j.properties", \
+            "-Dcom.objy.suppress-loadpath=true"
             ]
-            mainClass = "com.objy.javaulb.labs.lab02.Lab02a"
+            mainClass = "com.objy.javaulb.labs.lab02.Lab02aCreatePersonClass"
             standardInput = System.in
             if (project.hasProperty('args')) {
                     args(args.split(','))
@@ -257,9 +258,10 @@ task run02b() {
             jvmArgs = [\
             "-Xmx8G", \
             "-DBOOT_FILE=${bootfile}", \
-            "-Dlog4j.configuration=file:${PROJECT_DIR}/properties/log4j.properties"
+            "-Dlog4j.configuration=file:${PROJECT_DIR}/properties/log4j.properties", \
+            "-Dcom.objy.suppress-loadpath=true"
             ]
-            mainClass = "com.objy.javaulb.labs.lab02.Lab02b"
+            mainClass = "com.objy.javaulb.labs.lab02.Lab02bReadPersonSchema"
             standardInput = System.in
             if (project.hasProperty('args')) {
                     args(args.split(','))
@@ -279,9 +281,10 @@ task run02c() {
             jvmArgs = [\
             "-Xmx8G", \
             "-DBOOT_FILE=${bootfile}", \
-            "-Dlog4j.configuration=file:${PROJECT_DIR}/properties/log4j.properties"
+            "-Dlog4j.configuration=file:${PROJECT_DIR}/properties/log4j.properties", \
+            "-Dcom.objy.suppress-loadpath=true"
             ]
-            mainClass = "com.objy.javaulb.labs.lab02.Lab02c"
+            mainClass = "com.objy.javaulb.labs.lab02.Lab02cNumbers"
             standardInput = System.in
             if (project.hasProperty('args')) {
                     args(args.split(','))
@@ -302,9 +305,10 @@ task run02d() {
             jvmArgs = [\
             "-Xmx8G", \
             "-DBOOT_FILE=${bootfile}", \
-            "-Dlog4j.configuration=file:${PROJECT_DIR}/properties/log4j.properties"
+            "-Dlog4j.configuration=file:${PROJECT_DIR}/properties/log4j.properties", \
+            "-Dcom.objy.suppress-loadpath=true"
             ]
-            mainClass = "com.objy.javaulb.labs.lab02.Lab02d"
+            mainClass = "com.objy.javaulb.labs.lab02.Lab02dSimpleReferences"
             standardInput = System.in
             if (project.hasProperty('args')) {
                     args(args.split(','))
@@ -324,9 +328,10 @@ task run02e() {
             jvmArgs = [\
             "-Xmx8G", \
             "-DBOOT_FILE=${bootfile}", \
-            "-Dlog4j.configuration=file:${PROJECT_DIR}/properties/log4j.properties"
+            "-Dlog4j.configuration=file:${PROJECT_DIR}/properties/log4j.properties", \
+            "-Dcom.objy.suppress-loadpath=true"
             ]
-            mainClass = "com.objy.javaulb.labs.lab02.Lab02e"
+            mainClass = "com.objy.javaulb.labs.lab02.Lab02eBidirRefToOneToOne"
             standardInput = System.in
             if (project.hasProperty('args')) {
                     args(args.split(','))
@@ -346,9 +351,10 @@ task run02f() {
             jvmArgs = [\
             "-Xmx8G", \
             "-DBOOT_FILE=${bootfile}", \
-            "-Dlog4j.configuration=file:${PROJECT_DIR}/properties/log4j.properties"
+            "-Dlog4j.configuration=file:${PROJECT_DIR}/properties/log4j.properties", \
+            "-Dcom.objy.suppress-loadpath=true"
             ]
-            mainClass = "com.objy.javaulb.labs.lab02.Lab02f"
+            mainClass = "com.objy.javaulb.labs.lab02.Lab02fListOfStrings"
             standardInput = System.in
             if (project.hasProperty('args')) {
                     args(args.split(','))
@@ -370,9 +376,10 @@ task run02g() {
             jvmArgs = [\
             "-Xmx8G", \
             "-DBOOT_FILE=${bootfile}", \
-            "-Dlog4j.configuration=file:${PROJECT_DIR}/properties/log4j.properties"
+            "-Dlog4j.configuration=file:${PROJECT_DIR}/properties/log4j.properties", \
+            "-Dcom.objy.suppress-loadpath=true"
             ]
-            mainClass = "com.objy.javaulb.labs.lab02.Lab02g"
+            mainClass = "com.objy.javaulb.labs.lab02.Lab02gBiDirRefToManyToOne"
             standardInput = System.in
             if (project.hasProperty('args')) {
                     args(args.split(','))
@@ -394,9 +401,10 @@ task run02h() {
             jvmArgs = [\
             "-Xmx8G", \
             "-DBOOT_FILE=${bootfile}", \
-            "-Dlog4j.configuration=file:${PROJECT_DIR}/properties/log4j.properties"
+            "-Dlog4j.configuration=file:${PROJECT_DIR}/properties/log4j.properties", \
+            "-Dcom.objy.suppress-loadpath=true"
             ]
-            mainClass = "com.objy.javaulb.labs.lab02.Lab02h"
+            mainClass = "com.objy.javaulb.labs.lab02.Lab02hBiDirRefToManyToMany"
             standardInput = System.in
             if (project.hasProperty('args')) {
                     args(args.split(','))
@@ -420,9 +428,88 @@ task run02i() {
             jvmArgs = [\
             "-Xmx8G", \
             "-DBOOT_FILE=${bootfile}", \
-            "-Dlog4j.configuration=file:${PROJECT_DIR}/properties/log4j.properties"
+            "-Dlog4j.configuration=file:${PROJECT_DIR}/properties/log4j.properties", \
+            "-Dcom.objy.suppress-loadpath=true"
             ]
-            mainClass = "com.objy.javaulb.labs.lab02.Lab02i"
+            mainClass = "com.objy.javaulb.labs.lab02.Lab02iSetUniDirRefToMany"
+            standardInput = System.in
+            if (project.hasProperty('args')) {
+                    args(args.split(','))
+            }
+        }
+    }
+}
+
+task run02j() {
+    dependsOn recreateFD
+
+    group = "JavaULB_Lab02"
+
+    doLast{
+	println("Running 'run02i'")
+        println("LIB_DIR = ${LIB_DIR}")
+        println("PROJECT_DIR = ${PROJECT_DIR}")
+        javaexec{
+            classpath = files("${appClassPath}")
+            jvmArgs = [\
+            "-Xmx8G", \
+            "-DBOOT_FILE=${bootfile}", \
+            "-Dlog4j.configuration=file:${PROJECT_DIR}/properties/log4j.properties", \
+            "-Dcom.objy.suppress-loadpath=true"
+            ]
+            mainClass = "com.objy.javaulb.labs.lab02.Lab02jNameMapOfRefs"
+            standardInput = System.in
+            if (project.hasProperty('args')) {
+                    args(args.split(','))
+            }
+        }
+    }
+}
+
+task run02k() {
+    dependsOn recreateFD
+
+    group = "JavaULB_Lab02"
+
+    doLast{
+	println("Running 'run02i'")
+        println("LIB_DIR = ${LIB_DIR}")
+        println("PROJECT_DIR = ${PROJECT_DIR}")
+        javaexec{
+            classpath = files("${appClassPath}")
+            jvmArgs = [\
+            "-Xmx8G", \
+            "-DBOOT_FILE=${bootfile}", \
+            "-Dlog4j.configuration=file:${PROJECT_DIR}/properties/log4j.properties", \
+            "-Dcom.objy.suppress-loadpath=true"
+            ]
+            mainClass = "com.objy.javaulb.labs.lab02.Lab02kHashMapOfRefs"
+            standardInput = System.in
+            if (project.hasProperty('args')) {
+                    args(args.split(','))
+            }
+        }
+    }
+}
+
+task run02l() {
+    dependsOn recreateFD
+
+    group = "JavaULB_Lab02"
+
+    doLast{
+	println("Running 'run02i'")
+        println("LIB_DIR = ${LIB_DIR}")
+        println("PROJECT_DIR = ${PROJECT_DIR}")
+        javaexec{
+            classpath = files("${appClassPath}")
+            jvmArgs = [\
+            "-Xmx8G", \
+            "-DBOOT_FILE=${bootfile}", \
+            "-Dlog4j.configuration=file:${PROJECT_DIR}/properties/log4j.properties", \
+            "-Dcom.objy.suppress-loadpath=true"
+            ]
+            mainClass = "com.objy.javaulb.labs.lab02.Lab02lTreeMapOfRefs"
             standardInput = System.in
             if (project.hasProperty('args')) {
                     args(args.split(','))
@@ -432,8 +519,37 @@ task run02i() {
 }
 
 
-/*
-task run02j() {
+
+
+
+task run02m() {
+    dependsOn recreateFD
+
+    group = "JavaULB_Lab02"
+
+    doLast{
+	println("Running 'run02i'")
+        println("LIB_DIR = ${LIB_DIR}")
+        println("PROJECT_DIR = ${PROJECT_DIR}")
+        javaexec{
+            classpath = files("${appClassPath}")
+            jvmArgs = [\
+            "-Xmx8G", \
+            "-DBOOT_FILE=${bootfile}", \
+            "-Dlog4j.configuration=file:${PROJECT_DIR}/properties/log4j.properties", \
+            "-Dcom.objy.suppress-loadpath=true"
+            ]
+            mainClass = "com.objy.javaulb.labs.lab02.Lab02mInheritance"
+            standardInput = System.in
+            if (project.hasProperty('args')) {
+                    args(args.split(','))
+            }
+        }
+    }
+}
+
+
+task run02n() {
     group = "JavaULB_Lab02"
 
     doLast{
@@ -445,34 +561,10 @@ task run02j() {
             jvmArgs = [\
             "-Xmx8G", \
             "-DBOOT_FILE=${bootfile}", \
-            "-Dlog4j.configuration=file:${PROJECT_DIR}/properties/log4j.properties"
+            "-Dlog4j.configuration=file:${PROJECT_DIR}/properties/log4j.properties", \
+            "-Dcom.objy.suppress-loadpath=true"
             ]
-            mainClass = "com.objy.javaulb.labs.lab02.Lab02j"
-            standardInput = System.in
-            if (project.hasProperty('args')) {
-                    args(args.split(','))
-            }
-        }
-    }
-}
-*/
-
-
-task run02k() {
-    group = "JavaULB_Lab02"
-
-    doLast{
-	println("Running 'run02k'")
-        println("LIB_DIR = ${LIB_DIR}")
-        println("PROJECT_DIR = ${PROJECT_DIR}")
-        javaexec{
-            classpath = files("${appClassPath}")
-            jvmArgs = [\
-            "-Xmx8G", \
-            "-DBOOT_FILE=${bootfile}", \
-            "-Dlog4j.configuration=file:${PROJECT_DIR}/properties/log4j.properties"
-            ]
-            mainClass = "com.objy.javaulb.labs.lab02.Lab02k"
+            mainClass = "com.objy.javaulb.labs.lab02.Lab02nEmbeddable"
             standardInput = System.in
             if (project.hasProperty('args')) {
                     args(args.split(','))
@@ -481,49 +573,8 @@ task run02k() {
     }
 }
 
-task run02l() {
 
-    doLast{
-	println("Running 'run02l'")
-        println("LIB_DIR = ${LIB_DIR}")
-        println("PROJECT_DIR = ${PROJECT_DIR}")
-        javaexec{
-            classpath = files("${appClassPath}")
-            jvmArgs = [\
-            "-Xmx8G", \
-            "-DBOOT_FILE=${bootfile}", \
-            "-Dlog4j.configuration=file:${PROJECT_DIR}/properties/log4j.properties"
-            ]
-            mainClass = "com.objy.javaulb.labs.lab02.Lab02l"
-            standardInput = System.in
-            if (project.hasProperty('args')) {
-                    args(args.split(','))
-            }
-        }
-    }
-}
 
-task run02m() {
-
-    doLast{
-	println("Running 'run02l'")
-        println("LIB_DIR = ${LIB_DIR}")
-        println("PROJECT_DIR = ${PROJECT_DIR}")
-        javaexec{
-            classpath = files("${appClassPath}")
-            jvmArgs = [\
-            "-Xmx8G", \
-            "-DBOOT_FILE=${bootfile}", \
-            "-Dlog4j.configuration=file:${PROJECT_DIR}/properties/log4j.properties"
-            ]
-            mainClass = "com.objy.javaulb.labs.lab02.Lab02m"
-            standardInput = System.in
-            if (project.hasProperty('args')) {
-                    args(args.split(','))
-            }
-        }
-    }
-}
 
 
 
@@ -532,25 +583,9 @@ def makeDir(dirPath){
     if(!folder.exists()){
         folder.mkdirs()
     }
-}                                                                                                                                                                                                                            
+}   
 
 
 
+                                                                                                                                                                                                                         
 
-
-
-
-// Note: "common.gradle" in the root project contains additional initialization
-//   for this project. This initialization is applied in the "build.gradle"
-//   of the root project.
-
-// NetBeans will automatically add "run" and "debug" tasks relying on the
-// "mainClass" property. You may however define the property prior executing
-// tasks by passing a "-PmainClass=<QUALIFIED_CLASS_NAME>" argument.
-//
-// Note however, that you may define your own "run" and "debug" task if you
-// prefer. In this case NetBeans will not add these tasks but you may rely on
-// your own implementation.
-//if (!hasProperty('mainClass')) {
-//    ext.mainClass = 'com.objy.javaulb.labs.lab01.Lab01'
-//}
